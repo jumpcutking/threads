@@ -9,8 +9,6 @@
  * May be subject to The Universe Terms of Service.
  **/
 
-var report = true;
-
 /**
  * Validates that a value is of specified type.
  * You may also test for an array
