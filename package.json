@@ -1,0 +1,34 @@
+{
+  "name": "@jumpcutking/threads",
+  "version": "1.0.0",
+  "description": "Threads is a multiple-thread management tool handling a pool of threads and communication between all connected threads for node.js. Threads is a powerful solution to going beyond web workers.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jumpcutking/threads.git"
+  },
+  "keywords": [
+    "thread",
+    "thread",
+    "manager",
+    "nodejs",
+    "threads",
+    "process",
+    "threads",
+    "spawn",
+    "threads",
+    "jumpcutking"
+  ],
+  "author": "Justin K Kazmierczak",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/jumpcutking/threads/issues"
+  },
+  "homepage": "https://github.com/jumpcutking/threads#readme"
+}
