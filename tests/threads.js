@@ -36,10 +36,9 @@ threads.add("test.thread","./thread.js", {
 //Add an action to the thread
 threads.addAction("parent-count", async (data) => {
     console.log(`Parent thread count: ${data.count}`, data);
-    // console.log("Process requested action universe.test.thread", message);
 });
 
-console.log("Threads List: ", threads.list());
+console.log("The Thread Manager", threads.list());
 
 console.log("Sending hello world");
 
