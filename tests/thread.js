@@ -53,3 +53,7 @@ setTimeout(() => {
     console.log("Closing thread.");
     process.exit(0);
 }, 20000);
+
+
+//keep the process alive
+setInterval(() => {}, 1000);
