@@ -1,7 +1,7 @@
 # threads
 Threads is a multiple-thread management tool handling a pool of threads and communication between all connected threads for node.js. Threads is a powerful solution to going beyond web workers. Threads share the same modules, have acess to the same scripts, but don't require forked processes. Threads also communicate through encoded JSON.
 
-Orginally built as part of The Universe App Tools and other applications I'm working on, I've decided to release the source to help the community solve the greater problem: helping Node.JS function with sustainable thread management comparable to other environments. It's not perfect but it's a good start. This is server side threads NOT worker-threads. It's a difficult approach, for better or worse.
+Orginally built as part of The Universe App Tools, I've decided to release the source to help the community solve the node threading problem: helping Node.JS function with mutliple process threads and communicate between all processes. This is application threads and can't be used in browser. It's a different approach than worker threads, for better or worse.
 
 ## License
 The license is close to MIT with a few important modifications. Check the license file for more information. May be subjct to The Universe Terms of Service. https://egtuniverse.com/legal/terms
