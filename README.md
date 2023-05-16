@@ -4,7 +4,7 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes. 
 
 ## What's New
-Beginning with version 1.1.2, I've introduced listeners. They act like events dispatching attached functions similar to other modules. Identical to how actions are attached, you can create a portion of your code to listen to all events requested (send to children) by adding a requests listener (addRequestsListener). You can do the same thing with received requests (from the children) (addReceivedListener).
+Beginning with version 1.1.2, I've introduced listeners. They act like events dispatching attached functions similar to other modules. Identical to how actions are attached, you can create a portion of your code to listen to all events requested (send to children) by adding a requests listener (addRequestsListener). You can do the same thing with received requests (from the children) (addReceivedListener).`
 
 ## Warning
 It's a different approach than worker threads; it's designed for a sophisticated app like a socket server or an electron app. Unfortunately, as of now, it can't be used in a browser.
@@ -161,5 +161,4 @@ For a Node.js Process (a thread) to not close before you have sent it a message 
 # Tests
 I've created a thread manager test that showcases all of the features. To run it, call it in a terminal.
 
-    cd tests
-    node threads.js
+    npm test
