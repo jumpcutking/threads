@@ -25,7 +25,10 @@
     "threads",
     "jumpcutking"
   ],
-  "author": "Justin K Kazmierczak",
+  "author": {
+    "name": "jumpcutking",
+    "email": "lorises-07fluster@icloud.com"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "bugs": {
     "url": "https://github.com/jumpcutking/threads/issues"

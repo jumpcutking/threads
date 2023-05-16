@@ -32,7 +32,11 @@ var spzArr = require("./spzArray.js");
  */
 var my = {
     threads: false,
-    actions: false
+    actions: false,
+    listener: {
+        requests: [],
+        received: []
+    }
 }
 
 /**
@@ -75,6 +79,27 @@ function init(id = "threads") {
 
 }  
 module.exports.init = init;
+
+/**
+ * Adds a listener to the thread manager, which will listen to all event requests sent by the thread manager.
+ * @param {*} listener 
+ */
+function addRequestsListener(listener) {
+    my.listener.requests.push(listener);
+    SimpleLog("Added requesting message listener.", listener);
+}
+module.exports.addRequestsListener = addRequestsListener;
+
+/**
+ * Adds a listener to the thread manager, which will listen to all event requests sent by the thread manager.
+ * @param {*} listener
+ */
+function addReceivedListener(listener) {
+    my.listener.received.push(listener);
+    SimpleLog("Added received message listener.", listener);
+}
+module.exports.addReceivedListener = addReceivedListener;
+
 
 /**
  * Adds a thead to the manager.
@@ -132,6 +157,8 @@ function add(id, local, options) {
                 })
 
 
+
+
                 try {
                     if ("onExit" in thread.options) {
                         thread.options.onExit(code);
@@ -147,6 +174,17 @@ function add(id, local, options) {
                     });
                     
                 }
+
+                //support received an exit message to all listeners recieving messages.
+                SendMessageToRequestListeners({
+                    thread: thread.id,
+                    action: `process.exit`,
+                    message: `The thread: ${thread.id} exited with code: ${code}.`,
+                    $: {
+                        id: thread.id + ".process.exit"
+                    }
+                });
+
 
                 //remove the listener - listerners are not needed anymore as send is on the thread object itself.
                 SimpleLog("Removing thread.", {
@@ -348,6 +386,8 @@ function Send(actionID, message, threadID = "") {
         };
     }
 
+    SendMessageToRequestListeners(message);
+
     var sent = false;
     try {
         //if thread is blank or "*"
@@ -378,6 +418,66 @@ function Send(actionID, message, threadID = "") {
      }
 }
 module.exports.send = Send;
+
+/**
+ * Sends the request message that is about to be sent to all threads to any request listeners.
+ * They should be async or functions. 
+ * All errors will be caught and logged.
+ * @param {*} message The standard message object. $.id is the action id.
+ */
+function SendMessageToRequestListeners(message) {
+       //Send the message to any attached listener, if any, before sending to the thread.
+       try {
+        
+        if (my.listener.requests.length > 0) {
+            my.listener.requests.forEach(listener => {
+                try {
+                    listener(message)
+                } catch (error) {
+                    SimpleLog("Error in calling listener (request send).", {
+                        error: error,
+                        listerner: listener,
+                        message: message
+                    })
+                }
+            });
+        }
+    } catch (error) {
+        SimpleLog("Error in handling listener (request send).", {
+            error: error,
+            message: message
+        });
+    }
+}
+
+/**
+ * Sends a mesage to all listener functions aded to my.listener.received - they should be async or functions.
+ * All errors will be caught and logged.
+ * @param {*} message The standard message object. $.id is the action id. if $.id = thread.id + "process.exit" - a process has exited.
+ */
+function SendMessageToReceivedListeners(message) {
+    //fire all received listerners
+    try {
+        if (my.listener.received.length > 0) {
+            my.listener.received.forEach(listener => {
+                try {
+                    listener(message);
+                } catch (error) {
+                    SimpleLog("Error in calling listener (recv message).", {
+                        error: error,
+                        listerner: listener,
+                        message: message
+                    })
+                }
+            });
+        }
+    } catch (error) {
+        SimpleLog("Error in handling listener (recv message).", {
+            error: error,
+            message: message
+        });
+    }
+}
 
 /**
  * Handles messages received from the child thread.
@@ -431,7 +531,6 @@ function handleMessage(thread, message) {
         });
     }
 
-
     //check to see if the thread has disabled actions
     if ("disableActions" in thread.options && thread.options.disableActions) {
         SimpleLog(`Actions disabled for thread ${thread.id}`, {
@@ -455,6 +554,11 @@ function handleMessage(thread, message) {
 
         //convert the message to a json object
         message = JSON.parse(message);
+
+        //send to listeners - only json objects please 
+        //Perhabs should check for a $.id property to validate
+        //the object is a message object - ignore else???
+        SendMessageToReceivedListeners(message);
 
         //is an action registered
         var action = my.actions.search(message.$.id)?.handler;
@@ -534,7 +638,7 @@ module.exports.log = log
  */
 function SimpleLog(message, object = {}) {
     if (options.verbose) {
-        console.log(message, object, {verbose: verbose});
+        console.log(message, object, {verbose: options.verbose});
     }
 }
 
