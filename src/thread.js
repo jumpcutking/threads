@@ -69,8 +69,15 @@ function init(id = "thread") {
         }`);
     });
 
+    addAction("thread.close", Close);
+
 }  
 module.exports.init = init;
+
+/** Requested close. */
+function Close() {
+    process.exit(0);
+}
 
 /**
  * Adds an action to the thread.
