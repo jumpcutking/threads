@@ -16,6 +16,10 @@
 // const { level_info } = require("./logger");
 var santize = require("./sanitize.js"); 
 
+/**
+ * The options that you can set in the module.
+ * verbose: whether to log verbose messages, default: false
+ */
 var options = {
   verbose: false
 }
@@ -24,7 +28,8 @@ var options = {
   * Creates a registry that has events (registry.events) it may call.
   * It will call validation before adding (and checking namespace);
   * It will call onAdd after adding a new item.
-  * @returns A registry.
+  * @param {String} id The id of the registry.
+  * @returns {Object} A registry.
   */
 function create(id = "registry") {
 
@@ -40,6 +45,10 @@ function create(id = "registry") {
   };
 }
 
+/**
+ * Return all the id's as an array that are currently in the registry.
+ * @returns {Array} A list of all id's in the registry.
+ */
 function list() {
   var arr = [];
   for (var i = 0; i < this.registry.length; i++) {
@@ -51,7 +60,7 @@ function list() {
 /**
  * Searches for an item in the current registry by it's id.
  * @param {String} id The id of the item to search for.
- * @returns the item or false
+ * @returns {Boolean} the item or false
  */
 function search(id) {
   var found = false;
@@ -82,7 +91,7 @@ function search(id) {
 /**
  * Removes an item from the registry.
  * @param {String} id 
- * @returns the item or false
+ * @returns {Boolean} the item or false
  */
 function remove(id) {
   var found = false;
@@ -110,8 +119,8 @@ function remove(id) {
 
 /**
  * It is recommended to trim ids. You could also lowercase for easy acessing/searching.
- * @param {*} namespace 
- * @returns 
+ * @param {String} id The id to normalize. 
+ * @returns {String} the normalized id
  */
 function NormalizeID(id) {
   // console.log("Normalizing ID: " + id);
@@ -119,6 +128,7 @@ function NormalizeID(id) {
 }
 
 /**
+ * @throws {Error} If the object to add to the registry is not valid. (No ID as String).
  * Adds an item with an id to the registry.
  * @param {*} item 
  */

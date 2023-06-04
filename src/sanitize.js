@@ -1,5 +1,5 @@
 /**
- * Santization helps report common errors with a parameters.
+ * Santization helps report common errors with parameters.
  * 
  * This component may not be reversed engineered for hacking or abuse
  * of The EGT Universe, The Universe, or third-party apps.
@@ -18,7 +18,9 @@ var report = false;
 /**
  * Validates that a value is of specified type.
  * You may also test for an array
- * @param {*} must 
+ * @param {*} must The value type to test for. (TypeOf)
+ * @param {*} value The value to test.
+ * @returns {Boolean} Returns the result of the test.
  */
 function s(must, value) {
     if (must === "array") {
@@ -40,7 +42,8 @@ function s(must, value) {
 
 /**
  * Verifies an object is not null and undefined.
- * @param {*} value 
+ * @param {*} value The value to test.
+ * @returns {Boolean} Returns the result of the test.
  */
 function n(value) {
     
@@ -59,8 +62,9 @@ function n(value) {
 /**
  * Validates a value based on the typeof suppied.
  * Performs a "not null|undefined" test.
- * @param {*} must 
- * @param {*} value 
+ * @param {*} must The value type to test for. (TypeOf)
+ * @param {*} value The value to test.
+ * @returns {Boolean} Returns the result of the test.
  */
 function main(must, value) {
     var okay = false;
@@ -74,8 +78,11 @@ function main(must, value) {
 }
 
 /**
- * Validates a value to a string, and conforms it to lowercase, and trims
- * @param {*} value 
+ * @throws {Error} Throws an error if the value is not a string.
+ * Validates a value to a string, and conforms it to lowercase, and trims.
+ * @param {*} value the value to test
+ * @param {*} _trim whether to trim the string
+ * @returns {Boolean} Returns the updated value.
  */
 function l(value, _trim = true) {
     var okay = false;

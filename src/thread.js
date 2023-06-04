@@ -40,7 +40,7 @@ module.exports.options = options;
 
 /**
  * Set up the child thread.
- * @param {*} id The ID of the child thread.
+ * @param {Object} _options The options to set up the thread with.
  */
 function init(_options = {}) {
 
@@ -122,31 +122,19 @@ module.exports.init = init;
 
 /**
  * Get's information about the thread from the thread manager.
+ * @param {*} data The object sent from the thread manager. Including the threadID (.threadId).
  */
 function Startup(data) {
     // console.log("Startup", data);
     options.id = data.threadId;
 }
 
-/** Requested close. */
+/**
+ *  Closes the thread gracefully. 
+*/
 function Close() {
     process.exit(0);
 }
-
-/**
- * Adds an action to the thread.
- * @param {*} id The id of the action.
- * @param {*} handler The function to call when the action is requested.
- * @returns 
- */
-function addAction(id, handler) {
-
-    return my.actions.add({
-        id: id,
-        handler: handler
-    });
-}
-module.exports.addAction = addAction;
 
 /**
  * Handles a message object from the Thread Manager.
@@ -185,7 +173,7 @@ module.exports.handleMessage = handleMessage;
 
 /**
  * Request a message from the parent process.
- * @param {*} id The id of the action to request.
+ * @param {string} id The id of the action to request.
  * @param {*} message The data to send to the parent process.
  */
 function request(id, message) {
@@ -216,9 +204,8 @@ module.exports.request = request;
 
 /**
  * Adds a new action to the thread.
- * @param {*} id The id of the action to listen for from the parent process.
+ * @param {string} id The id of the action to listen for from the parent process.
  * @param {*} handler The function to call when the action is requested.
- * @returns 
  */
 function addAction(id, handler) {
     log_verbose("addAction", `Adding action: ${id}`, {

@@ -53,7 +53,8 @@ module.exports.actions = my.actions;
  * Create and initialize a thread manager.
  * Warning: This thread manager is designed for one manager per application. 
  *          Threads attach to the same manager. Only call this once!
- * @param {*} id The id of the thread manager.
+ * @param {string} id The id of the thread manager.
+ * @param {*} _options The options to set up the thread manager with.
  */
 function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
@@ -118,10 +119,10 @@ module.exports.addReceivedListener = addReceivedListener;
  *              spawn: {
  *                  command: "node",            The command to spawn the thread with. Default: node, but can be any command.
  *              }
- * @param {*} id the id of the thread. Must be unique.
+ * @param {string} id the id of the thread. Must be unique.
  * @param {*} local the script to spawn
  * @param {*} options the options, such as spawn args, and delegates. 
- * @returns 
+ * @returns {boolean} True if the thread was added or false if the thread had an issue.
  */
 function add(id, local, options) {
     SimpleLog("Adding thread.", {
@@ -362,9 +363,9 @@ module.exports.add = add;
 
 /**
  * Adds an action to the thread manager.
- * @param {*} id The id of the action.
+ * @param {string} id The id of the action.
  * @param {*} handler The function to call when the action is requested.
- * @returns 
+ * @returns {Boolean} True if the action was added, false if it was not.
  */
 function addAction(id, handler) {
     SimpleLog("Adding action.", {
@@ -549,7 +550,6 @@ function SendMessageToReceivedListeners(message) {
  * Handles messages received from the child thread.
  * @param {*} thread The thread object that the message was received from.
  * @param {*} message The data received from the thread.
- * @returns 
  */
 function handleMessage(thread, message) {
     SimpleLog("Handling message.", {
@@ -662,7 +662,7 @@ function handleMessage(thread, message) {
 /**
  * Get's the details of a thread. (safe)
  * @param {*} thread The thread itself.
- * @returns  A clone of the thread obect without the process.
+ * @returns {Object} A clone of the thread obect without the process.
  */
 function detialsOfThread(thread) {
     //clone the obect and remove process
@@ -710,7 +710,8 @@ function SimpleLog(message, object = {}) {
 }
 
 /**
- * Should the thread output extra log messages?
+ * @deprecated
+ * Depreciated. Should the thread output extra log messages?
  * @param {*} verbose 
  */
 function SetVerbose(verbose) {
