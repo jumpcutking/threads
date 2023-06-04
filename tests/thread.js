@@ -2,9 +2,11 @@
 var { thread } = require("../index.js");
 
 //init the thread
-var id = "mythread";
-thread.init(id);
-thread.SetVerbose(false);
+thread.init({
+    verbose: false,
+    debug: false,
+    keepAlive: true
+});
 
 //showcase how a console.log would work from the child thread.
 console.log("I'm a thread.");
@@ -23,7 +25,7 @@ thread.add("helloworld", async (data) => {
 //This test will start the count at the parent provided number and count up every second.
 var count = 0;
 thread.add("mythread.count", async (data) => {
-    thread.log(id, "Received the count request.", data);
+    thread.log(thread.options.id, "Received the count request.", data);
     count = data.startAt;
 
     setInterval(() => {
@@ -48,12 +50,54 @@ thread.add("thead.close", async (data) => {
     process.exit(0);
 });
 
+/**
+ * Parent hello action!
+ */
+thread.add("parent-hello", async (data) => {
+    console.log("Received the parent-hello message", data);
+    ThankYou(data);
+});
+
+thread.add("direct-message", async (data) => {
+    console.log("Received the direct-message message", data);
+    ThankYou(data);
+});
+
+
+/**
+ * Function sends a unified response to the thread manager.
+ * @param {*} data 
+ */
+function ThankYou(data) {
+    thread.request("thank-you", {
+        recieved: data,
+        myid: thread.options.id
+    })
+}
+
+console.log("Thread is ready.", thread.list());
+
+/** Test Thread Requests */
+
+if (thread.options.debug) {
+
+    thread.handleMessage({
+        $:{
+            id: "parent-hello"
+        },
+        hello: "world"
+    });
+
+    thread.handleMessage({
+        $:{
+            id: "direct-message"
+        },
+        hello: "world"
+    });
+}
+
 //close after 3 seconds
 setTimeout(() => {
     console.log("Closing thread.");
     process.exit(0);
 }, 20000);
-
-
-//keep the process alive
-setInterval(() => {}, 1000);

@@ -9,10 +9,20 @@
  * May be subject to The Universe Terms of Service.
  **/
 
+/**
+ * The options that you can set in the module.
+ * id: the name of the thread
+ * verbose: whether to log verbose messages
+ * closeAction: the action to fire when the thread is closed
+ * debug: if activated, no messages will be sent to the thread manager.
+ * keepAlive: the thread will stay active awaiting further requests until closed.
+ */
 var options = {
     id: "threads.thread",
     verbose: false,
-    closeAction: "thread.close"
+    closeAction: "thread.close",
+    debug: false,
+    keepAlive: true
 }
 
 /**
@@ -26,16 +36,45 @@ var my = {
 }
 
 module.exports.actions = my.actions;
-// module.exports.options = options;
+module.exports.options = options;
 
 /**
  * Set up the child thread.
  * @param {*} id The ID of the child thread.
  */
-function init(id = "thread") {
-    options.id = id;
+function init(_options = {}) {
 
-    my.actions = new spzArr(`${id}.actions`);
+    log_verbose("init", `Initializing thread...`, {
+        script: process.argv[1],
+        options: _options
+    });
+
+    // options.id = id;
+
+    if ("debug" in _options) {
+        options.debug = _options.debug;
+    }
+
+    if ("verbose" in _options) {
+        options.verbose = _options.verbose;
+    }
+
+    if ("closeAction" in _options) {
+        options.closeAction = _options.closeAction;
+    }
+
+    if ("keepAlive" in _options) {
+        options.keepAlive = _options.keepAlive;
+    }
+
+    my.actions = new spzArr(`thread.actions`);
+
+    //if Debug mode is activated, report it as an error.
+    if (options.debug) {
+        console.error(`DEBUG MODE: The new thread has debug mode activated. The thread will operate silently to the thread manager.`, {
+            script: process.argv[1]
+        });
+    }
 
     /**
      * Receives messages from the thread manager (host) process.
@@ -63,16 +102,31 @@ function init(id = "thread") {
         log_verbose("process.ending", `Parent requested end. Firing: ${options.closeAction}`, null);
         handleMessage(`{
             "$": {
-                "id": "${options.closeAction}"
+                "id": "${options.closeAction}",
+                "threadId": "${options.id}"
             },
                 "from": "stdin"
         }`);
     });
 
     addAction("thread.close", Close);
+    addAction("thread.startup", Startup);
+
+    if (options.keepAlive) {
+        //keep the process alive
+        setInterval(() => {}, 1000);
+    }
 
 }  
 module.exports.init = init;
+
+/**
+ * Get's information about the thread from the thread manager.
+ */
+function Startup(data) {
+    // console.log("Startup", data);
+    options.id = data.threadId;
+}
 
 /** Requested close. */
 function Close() {
@@ -109,10 +163,16 @@ function handleMessage(message) {
 
         // var message = JSON.parse(message);
         var handler = my.actions.search(message.$.id)?.handler;
+        // console.log("Search results...", {
+        //     handler: handler,
+        //     searchResult: my.actions.search(message.$.id),
+        //     search: message.$.id
+        // });
+
         if (handler) {
              handler(message);
         } else {
-            log("onData.actionNotRegistered", `Requested action: ${message.$.id} is not registered.`, message)
+            log("onData.actionNotRegistered", `Requested action: ${message.$.id} is not registered to the thread: ${options.id}.`, {message})
         }
     } catch (error) {
         log_verbose("onData.error", `Thread: ${options.id} Could not parse JSON.`, {
@@ -132,10 +192,20 @@ function request(id, message) {
   
     if ("$" in message) {
         message.$.id = id;
+        message.$.threadId = options.id;
     } else {
         message.$ = {
-            id: id
+            id: id,
+            threadId: options.id
         };
+    }
+
+    /**
+     * If debug is true, then the message will not be sent to the thread manager.
+     */
+    if (options.debug == true) {
+        console.log("DEBUG MODE: Message would be sent to thread manager.", message);
+        return;
     }
 
     message = `\x04${JSON.stringify(message)}\x04`;
@@ -151,6 +221,10 @@ module.exports.request = request;
  * @returns 
  */
 function addAction(id, handler) {
+    log_verbose("addAction", `Adding action: ${id}`, {
+        id: id,
+        handler: handler
+    });
     return my.actions.add({
         id: id,
         handler: handler
@@ -189,9 +263,21 @@ function log_verbose(action, message, objects = {}) {
 }
 
 /**
- * Should the thread output extra log messages?
- * @param {*} verbose 
+ * List all the threads and listerners.
+ * @returns {Object} {threads: [], listerners: []}
  */
-function SetVerbose(verbose) {
-    options.verbose = verbose;
-} module.exports.SetVerbose = SetVerbose;
+function list() {
+    return {
+        actions: my.actions.list()
+    }
+}
+module.exports.list = list;
+
+
+// /**
+//  * Should the thread output extra log messages?
+//  * @param {*} verbose 
+//  */
+// function SetVerbose(verbose) {
+//     options.verbose = verbose;
+// } module.exports.SetVerbose = SetVerbose;

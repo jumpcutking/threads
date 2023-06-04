@@ -20,7 +20,7 @@ var { spawn } = require('child_process');
  */
 var options = {
     id: "threads",
-    verbose: true,
+    verbose: false,
     closeID: "thread.close"
 }
 // module.exports.options = options;
@@ -55,13 +55,18 @@ module.exports.actions = my.actions;
  *          Threads attach to the same manager. Only call this once!
  * @param {*} id The id of the thread manager.
  */
-function init(id = "threads") {
+function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
         id: id
     })
 
     options.id = id;
     options.ns = id;
+
+    //Passthrough the options
+    if ("verbose" in _options) {
+        options.verbose = _options.verbose;
+    }
 
     my.threads = new spzArr(`${options.id}.threads`);
     my.actions = new spzArr(`${options.id}.actions`);
@@ -110,6 +115,9 @@ module.exports.addReceivedListener = addReceivedListener;
  *              onExit: function(code) { ... }  Return from the thread when it exits.
  *              onSend: function(message) { ... }  Reports what's being sent to a thread before it is sent.
  *              disableActions: true|false      Disable the default action handler.
+ *              spawn: {
+ *                  command: "node",            The command to spawn the thread with. Default: node, but can be any command.
+ *              }
  * @param {*} id the id of the thread. Must be unique.
  * @param {*} local the script to spawn
  * @param {*} options the options, such as spawn args, and delegates. 
@@ -121,6 +129,17 @@ function add(id, local, options) {
         local: local,
         options: options
     });
+
+    var spawnOptions = {
+        command: "node"
+    }
+
+    //Passthrough the options for spawning a new process.
+    if ("spawn" in options) {
+        if ("command" in options.spawn) {
+            spawnOptions.command = options.spawn.command;
+        }
+    }
 
     try {
         
@@ -140,7 +159,7 @@ function add(id, local, options) {
                 local: local
             });
 
-            thread.process = spawn('node', [local]);
+            thread.process = spawn(spawnOptions.command, [local]);
 
             // set the encoding of the stdout stream to 'utf8'
             thread.process.stdout.setEncoding('utf8'); //may need to change to UTF-32
@@ -293,6 +312,16 @@ function add(id, local, options) {
                  }
             };
 
+            /** Tell the thread it's ID and the thread manager's ID. */
+            thread.send({
+                $: {
+                    id: "thread.startup"
+                },
+                threadId: thread.id,
+                local: local,
+                managerId: my.id
+            })
+
             return true;
 
         } else {
@@ -399,13 +428,50 @@ function Send(actionID, message, threadID = "") {
                sent = true;
             });
         } else {
-            //send to a specific thread
-            my.threads.search(threadID)?.send(message);
-            sent = true;
+
+            try {
+                
+                //send to a specific thread
+                my.threads.search(threadID)?.send(message);
+                sent = true;
+
+            } catch (error) {
+                
+                if (error.message == "my.threads.search(...)?.send is not a function") {
+
+                    receivedLog({
+                        thread: threadID,
+                        action: `onSend.noThread`,
+                        message: `Error sending message. No thread found with id: ${threadID}.`,
+                        objects: {
+                            // error: error,
+                            action: actionID,
+                            message: message,
+                            thread: threadID
+                        }
+                    });
+
+                } else {
+
+                    receivedLog({
+                        thread: threadID,
+                        action: `onSend.error`,
+                        message: `Error sending message.`,
+                        objects: {
+                            error: error,
+                            action: actionID,
+                            message: message,
+                            thread: threadID
+                        }
+                    });
+                }
+
+            }
+            
         }
     } catch (error) {
         receivedLog({
-            thread: id,
+            thread: threadID,
             action: `onSend.error`,
             message: `Error sending message.`,
             objects: {
@@ -572,7 +638,8 @@ function handleMessage(thread, message) {
             receivedLog({
                 thread: thread.id,
                 action: `onData.actionNotRegistered`,
-                message: `Requested action: ${message.$.id} is not registered.`,
+                owner: options.id,
+                message: `Requested action: ${message.$.id} is not registered to the manager: ${options.id}.`,
                 objects: {
                     data: message,
                     thread: detialsOfThread(thread)

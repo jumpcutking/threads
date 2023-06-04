@@ -114,6 +114,7 @@ function remove(id) {
  * @returns 
  */
 function NormalizeID(id) {
+  // console.log("Normalizing ID: " + id);
   return id.trim();
 }
 
@@ -124,17 +125,15 @@ function NormalizeID(id) {
 function add(item) {
 
   if (!(santize("object", item))) {
-    SimpleLog(`The item must be an object.`, {
-      adding: item
-    })
-    return false;
+    throw new Error("The item must be an object.");
   }
 
   if (!("id" in item)) {
-    SimpleLog(`The item must have an id.`, {
-      adding: item
-    });
-    return false;
+    throw new Error("The item must have an id.");
+  }
+
+  if (!(santize("string", item.id))) {
+    throw new Error("The item's id must be a string.");
   }
 
   //ensure your id matches the search protocols - prevent human error
@@ -144,11 +143,7 @@ function add(item) {
     //I have no items in my registry, so I'm safe.
   } else {
     if (this.search(item.id,false) !== false) {
-      SimpleLog(`The registry already has an object registered by the id ${item.id}.`, {
-        adding: item,
-        found: this.search(item.id)
-      });
-      return false;
+      throw new Error("The item's id already exists in the registry.");
     }
   }
 

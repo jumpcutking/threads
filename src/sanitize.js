@@ -10,6 +10,12 @@
  **/
 
 /**
+ * Whether to report errors.
+ * It's like verbose mode... it's not needed here.
+ */
+var report = false;
+
+/**
  * Validates that a value is of specified type.
  * You may also test for an array
  * @param {*} must 
