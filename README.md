@@ -13,7 +13,10 @@ Threads will now throw errors to ensure that IDs (threads and actions) are uniqu
 Beginning with version 1.1.2, I've introduced listeners. They act like events dispatching attached functions similar to other modules. Identical to how actions are attached, you can create a portion of your code to listen to all events requested (send to children) by adding a requests listener (addRequestsListener). You can do the same thing with received requests (from the children) (addReceivedListener).`
 
 ## Breaking Changes
-Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. The individual threads will receive their IDs from the thread manager and will no longer be setting their own id.
+Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. The individual threads will receive their IDs from the thread manager and will no longer be setting their own id. 
+
+## Depreciated
+Verbose is an option provided on both thread.init() and threads.add() functions. SetVerbose is now depreciated. It will be removed soon.
 
 ## Warning
 It's a different approach than worker threads; it's designed for a sophisticated app like a socket server or an electron app. Unfortunately, as of now, it can't be used in a browser.
