@@ -4,6 +4,8 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
+I built API-level documentation. You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root.
+
 We've fixed a few bugs. Most significant bug: Calling specific threads has been corrected. 
 
 This documentation now tells you how to send messages from the thread to the thread manager, the thread manager to children threads, and more information on the child thread.
@@ -15,8 +17,8 @@ Beginning with version 1.1.2, I've introduced listeners. They act like events di
 ## Breaking Changes
 Beginning with version 1.1.9, Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. The individual threads will receive their IDs from the thread manager and will no longer be setting their own id. 
 
-## Depreciated
-Verbose is an option provided on both thread.init() and threads.add() functions. SetVerbose is now depreciated. It will be removed soon.
+## Deprecated
+Verbose is an option provided on both thread.init() and threads.add() functions. SetVerbose is now deprecated. It will be removed soon.
 
 ## Warning
 It's a different approach than worker threads; it's designed for a sophisticated app like a socket server or an electron app. Unfortunately, as of now, it can't be used in a browser.
