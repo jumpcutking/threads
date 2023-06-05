@@ -121,10 +121,16 @@ module.exports.addReceivedListener = addReceivedListener;
  *              }
  * @param {string} id the id of the thread. Must be unique.
  * @param {*} local the script to spawn
- * @param {*} options the options, such as spawn args, and delegates. 
+ * @param {*} options the options for the thread.
  * @returns {boolean} True if the thread was added or false if the thread had an issue.
  */
-function add(id, local, options) {
+function add(id, local, options = {}) {
+
+    if (my.threads == false) {
+        throw new Error("Thread manager not initialized. Call init() first.");
+    }
+
+
     SimpleLog("Adding thread.", {
         id: id,
         local: local,
@@ -175,9 +181,6 @@ function add(id, local, options) {
                     action: `process.exit`,
                     message: `The thread: ${thread.id} exited with code: ${code}.`,
                 })
-
-
-
 
                 try {
                     if ("onExit" in thread.options) {
@@ -424,10 +427,34 @@ function Send(actionID, message, threadID = "") {
         if (threadID == "*" || threadID == "") {
             threadID = "*";
             //send to all threads
-            my.threads.registry.forEach(thread => {
-               thread.send(message);
-               sent = true;
-            });
+            
+            var hasThreads = false
+            if (my.threads.registry == undefined) {
+
+            } else if (my.threads.registry.length == 0) {
+            } else {
+                hasThreads = true;
+            }
+            
+            if (hasThreads) {
+
+                my.threads.registry.forEach((thread) => {
+                    thread.send(message);
+                });
+
+            } else {
+                receivedLog({
+                    thread: threadID,
+                    action: `onSend.noThreadsRegistered`,
+                    message: `Error sending message. No threads found.`,
+                    objects: {
+                        // error: error,
+                        action: actionID,
+                        message: message,
+                        thread: threadID
+                    }
+                });
+            }
         } else {
 
             try {
