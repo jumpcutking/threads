@@ -594,7 +594,7 @@ Options:     All options are optional.
 | --- | --- | --- |
 | id | <code>string</code> | the id of the thread. Must be unique. |
 | local | <code>\*</code> | the script to spawn |
-| options | <code>\*</code> | the options, such as spawn args, and delegates. |
+| options | <code>\*</code> | the options for the thread. |
 
 <a name="addAction"></a>
 
