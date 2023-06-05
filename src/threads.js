@@ -660,7 +660,23 @@ function handleMessage(thread, message) {
                 thread: detialsOfThread(thread),
                 message: message
             });
-            action(message);
+
+            try {
+                action(message);
+            } catch (error) {
+                receivedLog({
+                    thread: thread.id,
+                    action: `onData.actionError`,
+                    owner: options.id,
+                    message: `Error running action: ${message.$.id} registered to the manager: ${options.id}.`,
+                    objects: {
+                        error: error,
+                        data: message,
+                        thread: detialsOfThread(thread)
+                    }
+                });
+            }
+
         } else {
             receivedLog({
                 thread: thread.id,
