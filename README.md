@@ -6,11 +6,13 @@ Originally built as part of The Universe App Tools, I've released the source to 
 ## What's New
 You can now request actions without data. This is great if you want to close a thread or toggle a varable.
 
+I've enhanced error handling object to report when an action failed. Previously, you would have gotten the catch all error when reporting JSON parsing errors. Generally, you'll never get a JSON parsing error from within the thread.js scripting modules. However, you may want to check the logic of additional process that support threads.js.
+
+In order to prevent an out of sequence order, attempting to add a thread without initiating the thread manager will cause an error. Call threads.init() before calling threads.add.
+
 I built API-level documentation. You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root.
 
 We've fixed a few bugs. Most significant bug: Calling specific threads has been corrected. 
-
-This documentation now tells you how to send messages from the thread to the thread manager, the thread manager to children threads, and more information on the child thread.
 
 Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. In addition, I fixed an issue that made it impossible to send direct messages to threads.
 
