@@ -361,7 +361,7 @@ Request a message from the parent process.
 | Param | Type | Description |
 | --- | --- | --- |
 | id | <code>string</code> | The id of the action to request. |
-| message | <code>\*</code> | The data to send to the parent process. |
+| message | <code>\*</code> | The data to send to the parent process. Will defualt to an empty object. |
 
 <a name="addAction"></a>
 

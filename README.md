@@ -4,6 +4,8 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
+You can now request actions without data. This is great if you want to close a thread or toggle a varable.
+
 I built API-level documentation. You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root.
 
 We've fixed a few bugs. Most significant bug: Calling specific threads has been corrected. 
@@ -19,9 +21,6 @@ Beginning with version 1.1.9, Threads will now throw errors to ensure that IDs (
 
 ## Deprecated
 Verbose is an option provided on both thread.init() and threads.add() functions. SetVerbose is now deprecated. It will be removed soon.
-
-## Warning
-It's a different approach than worker threads; it's designed for a sophisticated app like a socket server or an electron app. Unfortunately, as of now, it can't be used in a browser.
 
 ## License
 The license is close to MIT, with a few important modifications. Check the license file for more information. It may be subject to The Universe Terms of Service. https://egtuniverse.com/legal/terms
@@ -100,6 +99,9 @@ A request is sent to all threads by default or by setting a wildcard (*) as the 
 threads.send("helloworld", {
     message: "Hello World"
 });
+
+//you can now send requests without data
+threads.send("prepare-to-toggle");
 ```
 
 ### Direct Requests (Direct Messaging a Thread)
