@@ -174,9 +174,14 @@ module.exports.handleMessage = handleMessage;
 /**
  * Request a message from the parent process.
  * @param {string} id The id of the action to request.
- * @param {*} message The data to send to the parent process.
+ * @param {*} message The data to send to the parent process. Will defualt to an empty object.
  */
-function request(id, message) {
+function request(id, message = {}) {
+
+    // if message is null or undefined, set it to an empty object.
+    if (!message) {
+        message = {};
+    }
   
     if ("$" in message) {
         message.$.id = id;

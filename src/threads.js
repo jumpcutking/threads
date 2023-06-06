@@ -402,7 +402,12 @@ module.exports.list = list;
  * @param {*} message The message to be sent.
  * @param {*} threadID The id of the thread to send the message to. If id is blank, the message will be sent to all threads.
  */
-function Send(actionID, message, threadID = "") {
+function Send(actionID, message = {}, threadID = "") {
+
+    // if message is null or undefined, set it to an empty object.
+    if (!message) {
+        message = {};
+    }
     
     SimpleLog("Sending message.", {
         actionID: actionID,

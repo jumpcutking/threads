@@ -96,6 +96,12 @@ if (thread.options.debug) {
     });
 }
 
+thread.add("prepare-to-toggle", async (data) => {
+    //we won't be getting any data on this request - but we will get basic information about the request.
+    // console.log("Received the prepare-to-toggle message", data);
+    thread.request("toggle");
+});
+
 //close after 3 seconds
 setTimeout(() => {
     console.log("Closing thread.");

@@ -95,9 +95,22 @@ threads.addAction("parent-hello", async (data) => {
   console.log("From Test: The thread says hello!", data);
 });
 
+var toggle = true;
+threads.addAction("toggle", async (data) => {
+  //no data will be sent on this request - but we will get a $ message object with thread information.
+  toggle = !toggle;
+  console.log("From Test: The thread has asked to toggle!", {
+    toggle: toggle
+  });
+});
+
 //start the count by requesting the function from the thread.
 //Shows the registered actions and the running threads.
 console.log("Starting count");
+
+//Let's toggle the test toggle twice!
+threads.send("prepare-to-toggle");
+threads.send("prepare-to-toggle");
 
 //requesting the function from the thread.
 threads.send("mythread.count", {
@@ -109,7 +122,8 @@ threads.send("mythread.count", {
  * 
  * If you have any issues please report them to the github repo.
 
-> @jumpcutking/threads@1.1.9 test
+
+> @jumpcutking/threads@1.2.5 test
 > node tests/test.js
 
 Starting Threads Test, the thread manager is identified as threadManager
@@ -125,12 +139,14 @@ From Test: A child thread has received a message. {
     message: 'This is a direct message!',
     '$': { id: 'direct-message' }
   },
-  myid: 'mythread',
+  myid: 'test.thread.123',
   '$': { id: 'thank-you', threadId: 'test.thread.123' }
 }
-test.thread.123:[mythread] Received the count request. {
+From Test: The thread has asked to toggle! { toggle: false }
+From Test: The thread has asked to toggle! { toggle: true }
+test.thread.123:[test.thread.123] Received the count request. {
   thread: 'test.thread.123',
-  action: 'mythread',
+  action: 'test.thread.123',
   message: 'Received the count request.',
   objects: { startAt: 10, '$': { id: 'mythread.count' } },
   '$': { id: 'log', threadId: 'test.thread.123' }
