@@ -6,6 +6,8 @@ Originally built as part of The Universe App Tools, I've released the source to 
 ## What's New
 You can now request actions without data. This is great if you want to close a thread or toggle a varable.
 
+Added "hush" option to the thread manager to silence all log messages, not just verbose ones.
+
 I've enhanced error handling object to report when an action failed. Previously, you would have gotten the catch all error when reporting JSON parsing errors. Generally, you'll never get a JSON parsing error from within the thread.js scripting modules. However, you may want to check the logic of additional process that support threads.js.
 
 In order to prevent an out of sequence order, attempting to add a thread without initiating the thread manager will cause an error. Call threads.init() before calling threads.add.

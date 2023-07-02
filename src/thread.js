@@ -273,3 +273,12 @@ module.exports.list = list;
 // function SetVerbose(verbose) {
 //     options.verbose = verbose;
 // } module.exports.SetVerbose = SetVerbose;
+
+
+/**
+ * The thread object will output log messages if verbose is turned on.
+ */
+process.on('uncaughtException', (err) => {
+    log("asynchronous.uncaught", "An uncaught exception occurred.", err);
+    // console.error('Asynchronous error caught.', err);
+});

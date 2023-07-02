@@ -21,6 +21,7 @@ var { spawn } = require('child_process');
 var options = {
     id: "threads",
     verbose: false,
+    hush: false,
     closeID: "thread.close"
 }
 // module.exports.options = options;
@@ -54,7 +55,9 @@ module.exports.actions = my.actions;
  * Warning: This thread manager is designed for one manager per application. 
  *          Threads attach to the same manager. Only call this once!
  * @param {string} id The id of the thread manager.
- * @param {*} _options The options to set up the thread manager with.
+ * @param {*} _options The options to set up the thread manager with. 
+ *                     - verbose: Whether to output verbose logs.
+ *                     - hush: Whether to output any logs.
  */
 function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
@@ -67,6 +70,10 @@ function init(id = "threads", _options = {}) {
     //Passthrough the options
     if ("verbose" in _options) {
         options.verbose = _options.verbose;
+    }
+
+    if ("hush" in _options) {
+        options.hush = _options.hush;
     }
 
     my.threads = new spzArr(`${options.id}.threads`);
@@ -726,7 +733,9 @@ function detialsOfThread(thread) {
  */
 function receivedLog(message) {
     // console.log(message);
-    console.log(`${message.thread}:[${message.action}] ${message.message}`, message);
+    if (!(options.hush)) {
+        console.log(`${message.thread}:[${message.action}] ${message.message}`, message);
+    }
 }
 
 /**
