@@ -799,7 +799,13 @@ function sharePrettyLog(msg) {
     //remove first object if it's a string
     if (typeof firstObj === "string") {
         msg.objects.shift();
-        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`, msg.objects);
+
+        //check to see if objects is now an empty array
+        if (msg.objects.length == 0) {
+            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`);
+        } else {
+            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`, msg.objects);
+        }
     } else {
         logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`), msg.objects);
     }
