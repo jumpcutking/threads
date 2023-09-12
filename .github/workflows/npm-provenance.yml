@@ -3,29 +3,20 @@ on:
  release:
    types: [created]
 jobs:
-  publish:
-    runs-on: 'ubuntu-latest'
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v3 # v3
-      - name: Setup node
-        uses: actions/setup-node@v3 # v3
-        with:
-          node-version: 18
-          registry-url: 'https://registry.npmjs.com'
-          check-latest: true
-      - name: Publish package
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npmtoken}}
-        run: |
-          npm install -g npm@${{ github.event.inputs.cli_version }}
-          npm install
-          npm test
-          npm publish --provenance --access public
-      - uses: actions/upload-artifact@v3
-        with:
-          name: package.tgz
-          path: ./*.tgz
+ build:
+   runs-on: ubuntu-latest
+   permissions:
+     contents: read
+     id-token: write
+   steps:
+     - uses: actions/checkout@v3
+     - uses: actions/setup-node@v3
+       with:
+         node-version: '18.x'
+         registry-url: 'https://registry.npmjs.org'
+     - run: npm install -g npm
+     - run: npm ci
+     - run: npm test
+     - run: npm publish --provenance --access public
+       env:
+         NODE_AUTH_TOKEN: ${{secrets.npmtoken}}
