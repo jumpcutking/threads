@@ -16,13 +16,15 @@
  * closeAction: the action to fire when the thread is closed
  * debug: if activated, no messages will be sent to the thread manager.
  * keepAlive: the thread will stay active awaiting further requests until closed.
+ * logging: if true, the thread will log messages to the thread manager. It will also overide console.
  */
 var options = {
     id: "threads.thread",
     verbose: false,
     closeAction: "thread.close",
     debug: false,
-    keepAlive: true
+    keepAlive: true,
+    logging: false
 }
 
 /**
@@ -65,6 +67,10 @@ function init(_options = {}) {
 
     if ("keepAlive" in _options) {
         options.keepAlive = _options.keepAlive;
+    }
+
+    if ("logging" in _options) {
+        options.logging = _options.logging;
     }
 
     my.actions = new spzArr(`thread.actions`);
@@ -117,8 +123,39 @@ function init(_options = {}) {
         setInterval(() => {}, 1000);
     }
 
+    //overide logging functions
+    if (options.logging) {
+        log_verbose("init", "Logging is enabled.", null);
+
+        OverideConsole();
+
+    }
+
 }  
 module.exports.init = init;
+
+
+var OverideConsoleOptions = {
+    hasRun: false,
+    console: {}
+};
+function OverideConsole() {
+    console.log("Overiding console.");
+
+    if (OverideConsoleOptions.hasRun) {
+        throw new Error("OverideConsole has already been called.");
+    }
+
+    var cnz = require("./console.js");
+    cnz.init((type, args, _log) => {
+        // process.write("HI!");
+        log("Console" , type, args);    
+        _log(args);
+    });
+
+    OverideConsoleOptions.hasRun = true;
+
+} module.exports.OverideConsole = OverideConsole;
 
 /**
  * Get's information about the thread from the thread manager.
@@ -279,6 +316,10 @@ module.exports.list = list;
  * The thread object will output log messages if verbose is turned on.
  */
 process.on('uncaughtException', (err) => {
-    log("asynchronous.uncaught", "An uncaught exception occurred.", err);
+
+    //convert error to json
+    err = JSON.stringify(err, Object.getOwnPropertyNames(err));
+
+    log("process.uncaught", "An uncaught exception occurred.", err);
     // console.error('Asynchronous error caught.', err);
 });

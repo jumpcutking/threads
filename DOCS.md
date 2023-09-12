@@ -1,3 +1,90 @@
+# console.js
+Used to replace Node's build in console, with one we can attach
+a listerner to. This enables children to send messages to the
+parent thread using console.log's known syntax.
+
+During debug mode, a child thread will report to the console
+as normal otherwise the console on the child thread will be
+silenced.
+
+Justin K Kazmierczak
+
+## Members
+
+<dl>
+<dt><a href="#Console">Console</a></dt>
+<dd><p>The console contrustor, for creating and working with the console.</p>
+</dd>
+<dt><a href="#myConsole">myConsole</a></dt>
+<dd><p>A child thread&#39;s new console object, used to log messages to the console.</p>
+</dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#zconsole">zconsole()</a> ⇒ <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#logDelegate">logDelegate(type, args, logger)</a></dt>
+<dd><p>Sets up the overiding log function.</p>
+</dd>
+<dt><a href="#init">init(_logDelegate)</a></dt>
+<dd><p>Initializes the console to report to the parent thread.</p>
+<p>During debug mode, a child thread will report to the console
+as normal otherwise the console on the child thread will be
+silenced.</p>
+</dd>
+</dl>
+
+<a name="Console"></a>
+
+## Console
+The console contrustor, for creating and working with the console.
+
+**Kind**: global variable  
+<a name="myConsole"></a>
+
+## myConsole
+A child thread's new console object, used to log messages to the console.
+
+**Kind**: global variable  
+<a name="zconsole"></a>
+
+## zconsole() ⇒ <code>Object</code>
+**Kind**: global function  
+**Returns**: <code>Object</code> - The new console object.  
+**Jumpcutking/threads**: - Child Console Object
+This replaces the normal node:console object for easy reporting to the 
+managing parent thread.  
+<a name="logDelegate"></a>
+
+## logDelegate(type, args, logger)
+Sets up the overiding log function.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>\*</code> |  |
+| args | <code>\*</code> |  |
+| logger | <code>\*</code> | If you'd like the output to go to the console, use this function. Modify args as needed. |
+
+<a name="init"></a>
+
+## init(_logDelegate)
+Initializes the console to report to the parent thread.
+
+During debug mode, a child thread will report to the console
+as normal otherwise the console on the child thread will be
+silenced.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| _logDelegate | <code>\*</code> | The function to call when a log is made. The thread creates one and passes it here. |
+
+
 # sanitize.js
 Santization helps report common errors with parameters.
 
@@ -255,7 +342,8 @@ id: the name of the thread
 verbose: whether to log verbose messages
 closeAction: the action to fire when the thread is closed
 debug: if activated, no messages will be sent to the thread manager.
-keepAlive: the thread will stay active awaiting further requests until closed.</p>
+keepAlive: the thread will stay active awaiting further requests until closed.
+logging: if true, the thread will log messages to the thread manager. It will also overide console.</p>
 </dd>
 <dt><a href="#buffer">buffer</a></dt>
 <dd><p>The buffer for incoming data.</p>
@@ -304,6 +392,7 @@ verbose: whether to log verbose messages
 closeAction: the action to fire when the thread is closed
 debug: if activated, no messages will be sent to the thread manager.
 keepAlive: the thread will stay active awaiting further requests until closed.
+logging: if true, the thread will log messages to the thread manager. It will also overide console.
 
 **Kind**: global variable  
 <a name="buffer"></a>
@@ -427,9 +516,9 @@ May be subject to The Universe Terms of Service.
 <dd><p>Options for the thread manager.</p>
 <ul>
 <li>id: The id for the thread manager.</li>
-<li>ns: Extra varable for the thread manager that matches to ID for enclosed functions.</li>
 <li>verbose: Whether to output verbose logs.</li>
 <li>closeID: The id to close the thread.</li>
+<li>logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.</li>
 </ul>
 </dd>
 <dt><a href="#my">my</a></dt>
@@ -496,16 +585,16 @@ All errors will be caught and logged.</p>
 <dd><p>Get&#39;s the details of a thread. (safe)</p>
 </dd>
 <dt><a href="#receivedLog">receivedLog(message)</a></dt>
-<dd><p>Reports messages from threads to the console. (to prevent tripple messages)</p>
+<dd><p>Reports messages from child threads using console.log to the console.
+{logging:true} must be enabled for both the child and parent thread.</p>
 </dd>
-<dt><a href="#log">log(action, message, objects)</a></dt>
-<dd><p>Reports parent thread the messages to the console (in the same format as children).</p>
+<dt><a href="#sharePrettyLog">sharePrettyLog(msg)</a></dt>
+<dd><p>Shares a Pretty Log message from the child thread.
+To activiate use init(,{logging: true}) on the child thread and the parent thread.</p>
 </dd>
 <dt><a href="#SimpleLog">SimpleLog(message, object)</a></dt>
 <dd><p>A simple log function that can be turned on and off.</p>
 </dd>
-<dt><del><a href="#SetVerbose">SetVerbose(verbose)</a></del></dt>
-<dd></dd>
 </dl>
 
 <a name="options"></a>
@@ -513,9 +602,9 @@ All errors will be caught and logged.</p>
 ## options
 Options for the thread manager.
 - id: The id for the thread manager.
-- ns: Extra varable for the thread manager that matches to ID for enclosed functions.
 - verbose: Whether to output verbose logs.
 - closeID: The id to close the thread.
+- logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
 
 **Kind**: global variable  
 <a name="my"></a>
@@ -548,7 +637,7 @@ Warning: This thread manager is designed for one manager per application.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | id | <code>string</code> | <code>&quot;threads&quot;</code> | The id of the thread manager. |
-| _options | <code>\*</code> |  | The options to set up the thread manager with. |
+| _options | <code>\*</code> |  | The options to set up the thread manager with.   - id: The id for the thread manager.  - verbose: Whether to output verbose logs.  - closeID: The id to close the thread.  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread. |
 
 <a name="addRequestsListener"></a>
 
@@ -682,7 +771,8 @@ Get's the details of a thread. (safe)
 <a name="receivedLog"></a>
 
 ## receivedLog(message)
-Reports messages from threads to the console. (to prevent tripple messages)
+Reports messages from child threads using console.log to the console.
+{logging:true} must be enabled for both the child and parent thread.
 
 **Kind**: global function  
 
@@ -690,18 +780,17 @@ Reports messages from threads to the console. (to prevent tripple messages)
 | --- | --- |
 | message | <code>\*</code> | 
 
-<a name="log"></a>
+<a name="sharePrettyLog"></a>
 
-## log(action, message, objects)
-Reports parent thread the messages to the console (in the same format as children).
+## sharePrettyLog(msg)
+Shares a Pretty Log message from the child thread.
+To activiate use init(,{logging: true}) on the child thread and the parent thread.
 
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| action | <code>\*</code> | The ID of the action. |
-| message | <code>\*</code> | The message to report. |
-| objects | <code>\*</code> | The objects sent from the child thread. |
+| msg | <code>\*</code> | The message object containing the console.f(...args) from the child. |
 
 <a name="SimpleLog"></a>
 
@@ -714,16 +803,5 @@ A simple log function that can be turned on and off.
 | --- | --- | --- |
 | message | <code>\*</code> | The message to log. |
 | object | <code>\*</code> | The object to report if possible. |
-
-<a name="SetVerbose"></a>
-
-## ~~SetVerbose(verbose)~~
-***Deprecated***
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| verbose | <code>\*</code> | 
 
 

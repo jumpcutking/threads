@@ -9,7 +9,8 @@ console.log(`Starting Threads Test, the thread manager is identified as ${id}`);
 
 //intialize the threads manager
 threads.init(`${id}.threads`, {
-    verbose: false
+    verbose: false,
+    logging: true
 });
 
 //Let's create an function for handling messages received and sent to the threads.

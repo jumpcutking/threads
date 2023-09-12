@@ -4,36 +4,33 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
-You can now request actions without data. This is great if you want to close a thread or toggle a varable.
+Thread children can now have console.log overridden to report logs directly to the parent thread.
 
-Added "hush" option to the thread manager to silence all log messages, not just verbose ones.
+Logs are now a little prettier, and reading the information from the console is easier.
 
-I've enhanced error handling object to report when an action failed. Previously, you would have gotten the catch all error when reporting JSON parsing errors. Generally, you'll never get a JSON parsing error from within the thread.js scripting modules. However, you may want to check the logic of additional process that support threads.js.
+Verbose mode is now activated on init().
 
-In order to prevent an out of sequence order, attempting to add a thread without initiating the thread manager will cause an error. Call threads.init() before calling threads.add.
+Enabling logging {logging: true} on a child thread will override the console.
 
-I built API-level documentation. You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root.
+You can now request actions without data. This is great to close a thread or toggle a variable.
 
-We've fixed a few bugs. Most significant bug: Calling specific threads has been corrected. 
+Hush has been replaced with logging. Activate {logging: true} on both the Thread manager and the child.
 
-Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. In addition, I fixed an issue that made it impossible to send direct messages to threads.
+I've enhanced the error handling object to report when an action failed. Previously, you would have gotten the catch-all error when reporting JSON parsing errors. Generally, you'll never get a JSON parsing error from within the thread.js scripting modules. However, you may want to check the logic of additional processes that support threads.js.
 
-Beginning with version 1.1.2, I've introduced listeners. They act like events dispatching attached functions similar to other modules. Identical to how actions are attached, you can create a portion of your code to listen to all events requested (send to children) by adding a requests listener (addRequestsListener). You can do the same thing with received requests (from the children) (addReceivedListener).`
+To prevent an out-of-sequence order, attempting to add a thread without initiating the thread manager will cause an error. Call threads.init() before calling threads.add.
 
-## Breaking Changes
-Beginning with version 1.1.9, Threads will now throw errors to ensure that IDs (threads and actions) are unique and not null strings. The individual threads will receive their IDs from the thread manager and will no longer be setting their own id. 
-
-## Deprecated
-Verbose is an option provided on both thread.init() and threads.add() functions. SetVerbose is now deprecated. It will be removed soon.
+## Program Level Documentation
+You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root. 
 
 ## License
-The license is close to MIT, with a few important modifications. Check the license file for more information. It may be subject to The Universe Terms of Service. https://egtuniverse.com/legal/terms
+The license is close to MIT, with a few essential modifications. Check the license file for more information. It was developed for use as part of The Universe. While it is offered freely in the traditional MIT license style, it's important to note that using Threads to circumvent or compromise the security of the Universe or developers using The Universe is a clear violation of [The Universe Terms of Service https://egtuniverse.com/legal/terms](https://egtuniverse.com/legal/terms). 
 
 # Thread Manager
-The thread manager is a short module designed to enable messages to be sent or received from both the threads and the main process (running the thread manager.) It's a unique and helpful messaging system that can be expanded. For example, sending a message by its ID to all threads or a specific thread is simple.
+The thread manager is a short module designed to enable messages to be sent or received from both the threads and the parent process (running the thread manager.) It's a unique and helpful messaging system that is easily expanded. For example, sending a message by its ID to all threads or a specific thread is simple.
 
 ## Install
-Hopefully, you will be able to install the node module using NPM.
+Use NPM to install and "--save" the module to your project's package.json file.
 
 ```Shell
 npm install @jumpcutking/threads --save
@@ -44,12 +41,12 @@ The thread manager uses an init function to prevent creating objects in memory u
 ```Javascript
 var { threads } = require("@jumpcutking/threads");
 
-//Turn off verbose mode - or you'll get flooded with messages
-threads.SetVerbose(false);
-
 //initialize the threads manager
 //choose an ID that will be easy to remember as you watch the logs
-threads.init(`my.threads`);
+threads.init(`my.threads`, {
+    verbose: false, // silence unknown messages
+    logging: true // activate collecting logs from parent threads
+});
 ```
 
 ## Adding a thread to the manager
@@ -59,11 +56,11 @@ Threads are spawned based on the location of the current script. Supply only a n
 //add a thread
 thread.add("test.thread","./thread.js", {
     onSend: function(data) {
-        //Anytime data is sent to a child; we can access the data here.
+        //Anytime data is sent to a child, we can access the data here.
         // console.log("Sent data to thread", data);
     },
     onData: function(data) {
-        //Anytime data is received from a child; we can access the data here.
+        //Anytime data is received from a child, we can access the data here.
         // console.log("Got data from thread", data);
     },
     onExit: function(code) {
@@ -81,12 +78,12 @@ thread.add("test.thread","./thread.js", {
 ```
 
 ## Spawn a process outside of Node
-You can spawn any process with the Thread Manager, however the process will need to support the manager. It will need to recieve a thread.startup action, and handle actions sent to it in the process stream. Node will be the default.
+You can spawn any process with the Thread Manager; however, the process will need to support the manager. It will need to receive a thread.startup action, and handle actions sent to it in the process stream. Node will be the default.
 
 ## Actions (Received Messages)
-Actions are activated on any message sent from the thread to its children, and the children use the object of their own action (per child) to handle requests from the thread manager. Unregistered actions will report issues to the console. You'll get a warning when a message has been requested with no action attached.
+Actions are activated on any message sent from the thread to its children, and the children use the object of their action (per Child) to handle requests from the thread manager. Unregistered actions will report issues to the console. You'll get a warning when a message has been requested with no action attached.
 
-Actions aren't limited to promises but the way they are called; they can be both async/await promises (chains may not work) and normal event-halting functions.
+Actions aren't limited to promises but how they are called; they can be both async/await promises (chains are untested) and normal event-halting functions.
 
 ```Javascript
 //Add an action to the thread
@@ -100,7 +97,7 @@ A request is sent to all threads by default or by setting a wildcard (*) as the 
 
 ```Javascript
 //send a message to the thread
-threads.send("helloworld", {
+threads.send("hello world", {
     message: "Hello World"
 });
 
@@ -109,7 +106,7 @@ threads.send("prepare-to-toggle");
 ```
 
 ### Direct Requests (Direct Messaging a Thread)
-A request can be dispatched to a specific thread ID, as registered to the Thread Manager. To do so, add a thread ID to the third parameter.
+A request can be dispatched to a thread ID registered to the Thread Manager. To do so, add a thread ID to the third parameter.
 
 ```Javascript
 threads.send("direct-message", {
@@ -138,7 +135,8 @@ Message objects will always have a meta object. Each request will override this 
     }
 ```
 
-Your actions will be spawned based on the id of the action.
+
+An action will be fired based on the id of that action.
 
 The $ variable will act as an overridden special id with the information provided by the thread manager. Avoid using this property when sending data through the thread manager or a thread.
 
@@ -158,7 +156,7 @@ async function ListenForMessages(message) {
     console.log("Listener Got a Message (children)", message);
 };
 
-//attach the listeners to the thread manager
+//Attach the listeners to the thread manager
 //Requests are made from the main thread to other children
 threads.addRequestsListener(ListenForRequests);
 
@@ -171,6 +169,13 @@ threads.addReceivedListener(ListenForMessages);
 //   console.log("Listener Got a Message (children)", message);
 // });
 ```
+
+# Logging
+Both the Child and The Parent support a common log system. A child thread with the option {logging: true} activated (on itself) will report console.info(), console.log(), console.warn(), and console.debug(). The console will be overridden and yet still report issues during debug mode.
+
+The parent thread or thread manager will control whether or not both the log messages from the child and the internal debugging messages from @jumpcutking/Threads itself.
+
+The options {verbose: true, logging: true} on the parent thread manager init help toggle the amount of logging. Verbose activates detailed logs about the internal workings of the Thread Manager; this can be very helpful when creating a process to work with threads that are not written in a supported program language. Logging will activate the specific action that a child's thread will report or deactivate so that only the parent thread's specific console is revealed.
 
 # Children Threads
 The thread manager comes with a child thread management object. This will receive messages from the parent object, run actions, and send requests to the parent. The manager creates the thread's ID (as provided to you during thread add/creation).
@@ -192,8 +197,10 @@ var { thread } = require("../index.js");
 
 //init the thread
 thread.init({
-    debug: true,
-    keepAlive: true
+    verbose: false, // silence thread specific log messages
+    debug: false, // activate debug mode
+    keepAlive: true, // Keep the thread alive for futher actions
+    logging: true // Activate log overide through console.log();...
 });
 
 /** Test Thread Requests */
@@ -277,7 +284,7 @@ Message objects sent by the thread will include an additional property in the $ 
 {
     $:{
         id: "myactionid"
-        threadId: "mythread" //only threads will provide this property
+        threaded: "my thread" //only threads will provide this property
     },
     (...)
 }

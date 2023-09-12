@@ -1,12 +1,22 @@
 //import the module
 var { thread } = require("../index.js");
 
-//init the thread
+// //init the thread
 thread.init({
     verbose: false,
     debug: false,
-    keepAlive: true
+    keepAlive: true,
+    logging: true
 });
+
+//activate debug mode thread
+// thread.init({
+//     verbose: true,
+//     debug: true,
+//     keepAlive: true,
+//     logging: true
+// });
+
 
 //showcase how a console.log would work from the child thread.
 console.log("I'm a thread.");
@@ -25,7 +35,8 @@ thread.add("helloworld", async (data) => {
 //This test will start the count at the parent provided number and count up every second.
 var count = 0;
 thread.add("mythread.count", async (data) => {
-    thread.log(thread.options.id, "Received the count request.", data);
+    console.info("Received the count request.", data);
+    // thread.log(thread.options.id, "Received the count request.", data);
     count = data.startAt;
 
     setInterval(() => {

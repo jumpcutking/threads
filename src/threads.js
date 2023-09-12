@@ -11,17 +11,20 @@
 
 var { spawn } = require('child_process');
 
+//let's us log colors to the console, for easy reading
+var colorOf = require("colors");
+
 /**
  * Options for the thread manager.
  * - id: The id for the thread manager.
- * - ns: Extra varable for the thread manager that matches to ID for enclosed functions.
  * - verbose: Whether to output verbose logs.
  * - closeID: The id to close the thread.
+ * - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
  */
 var options = {
     id: "threads",
     verbose: false,
-    hush: false,
+    logging: true,
     closeID: "thread.close"
 }
 // module.exports.options = options;
@@ -56,8 +59,10 @@ module.exports.actions = my.actions;
  *          Threads attach to the same manager. Only call this once!
  * @param {string} id The id of the thread manager.
  * @param {*} _options The options to set up the thread manager with. 
- *                     - verbose: Whether to output verbose logs.
- *                     - hush: Whether to output any logs.
+ *  - id: The id for the thread manager.
+ *  - verbose: Whether to output verbose logs.
+ *  - closeID: The id to close the thread.
+ *  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
  */
 function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
@@ -72,8 +77,8 @@ function init(id = "threads", _options = {}) {
         options.verbose = _options.verbose;
     }
 
-    if ("hush" in _options) {
-        options.hush = _options.hush;
+    if ("logging" in _options) {
+        options.logging = _options.logging;
     }
 
     my.threads = new spzArr(`${options.id}.threads`);
@@ -728,32 +733,96 @@ function detialsOfThread(thread) {
 }
 
 /**
- * Reports messages from threads to the console. (to prevent tripple messages)
+ * Reports messages from child threads using console.log to the console.
+ * {logging:true} must be enabled for both the child and parent thread.
  * @param {*} message 
  */
 function receivedLog(message) {
     // console.log(message);
-    if (!(options.hush)) {
-        console.log(`${message.thread}:[${message.action}] ${message.message}`, message);
+    if (options.logging) {
+        if ((message.action == "Console") && (message.message == "log" ||
+            message.message == "info" || message.message == "warn" ||
+            message.message == "error" || message.message == "debug")) {
+            
+            sharePrettyLog(message);
+
+        } else {
+            // throw new Error("Trace");
+            // console.log(`${message.thread}:[${message.action}] ${message.message}`, message);
+            console.log(colorOf.dim(`${message.thread}:`) + colorOf.underline(colorOf.green(`${message.action}`)) + ` ${message.message}`, message);
+        
+        }
     }
 }
 
 /**
- * Reports parent thread the messages to the console (in the same format as children).
- * @param {*} action The ID of the action. 
- * @param {*} message The message to report.
- * @param {*} objects The objects sent from the child thread.
+ * Shares a Pretty Log message from the child thread.
+ * To activiate use init(,{logging: true}) on the child thread and the parent thread.
+ * @param {*} msg The message object containing the console.f(...args) from the child.
  */
-function log(action, message, objects) {
-    console.log(`${options.id}:[${action}] ${message}`, {
-        thread: options.id,
-        action: action,
-        message: message,
-        objects: objects
-    });
+function sharePrettyLog(msg) {
+
+    var logHandler = console.log;
+    var color = false;
+
+    switch (msg.message) {
+        case "log":
+            //this is default
+            break;
+        case "info":
+            color = colorOf.blue;
+            logHandler = console.info;
+            break;
+        case "warn":
+            color = colorOf.yellow;
+            logHandler = console.warn;
+            break;
+        case "error":
+            color = colorOf.red;
+            logHandler = console.error;
+            break;
+        case "debug":
+            color = colorOf.green;
+            logHandler = console.debug;
+            break;
+        default:
+            console.warn(`Threads received an unknown log message type (${msg.message}) from a child thread.`);
+            break;
+    }
+
+    var firstObj = msg.objects[0];
+
+    if (color) {
+        firstObj = color(firstObj);
+    }
+
+    //remove first object if it's a string
+    if (typeof firstObj === "string") {
+        msg.objects.shift();
+        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`, msg.objects);
+    } else {
+        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`), msg.objects);
+    }
+
 }
 
-module.exports.log = log
+// /**
+//  * Reports parent thread the messages to the console (in the same format as children).
+//  * @param {*} action The ID of the action. 
+//  * @param {*} message The message to report.
+//  * @param {*} objects The objects sent from the child thread.
+//  */
+// function log(action, message, objects) {
+//     // throw new Error("Trace");
+//     console.log(colorOf.dim(`${options.id}:`) + colorOf.underline(colorOf.green(`${action}`)) + ` ${message}`, {
+//         thread: options.id,
+//         action: action,
+//         message: message,
+//         objects: objects
+//     });
+// }
+
+// module.exports.log = log
 
 /**
  * A simple log function that can be turned on and off.
@@ -762,15 +831,15 @@ module.exports.log = log
  */
 function SimpleLog(message, object = {}) {
     if (options.verbose) {
-        console.log(message, object, {verbose: options.verbose});
+        console.log(message, object);
     }
 }
 
-/**
- * @deprecated
- * Depreciated. Should the thread output extra log messages?
- * @param {*} verbose 
- */
-function SetVerbose(verbose) {
-    options.verbose = verbose;
-} module.exports.SetVerbose = SetVerbose;
+// /**
+//  * @deprecated
+//  * Depreciated. Should the thread output extra log messages?
+//  * @param {*} verbose 
+//  */
+// function SetVerbose(verbose) {
+//     options.verbose = verbose;
+// } module.exports.SetVerbose = SetVerbose;

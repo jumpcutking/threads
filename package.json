@@ -36,5 +36,8 @@
   "homepage": "https://github.com/jumpcutking/threads#readme",
   "devDependencies": {
     "jsdoc-to-markdown": "^8.0.0"
+  },
+  "dependencies": {
+    "colors": "^1.4.0"
   }
 }
