@@ -135,7 +135,6 @@ Message objects will always have a meta object. Each request will override this 
     }
 ```
 
-
 An action will be fired based on the id of that action.
 
 The $ variable will act as an overridden special id with the information provided by the thread manager. Avoid using this property when sending data through the thread manager or a thread.
