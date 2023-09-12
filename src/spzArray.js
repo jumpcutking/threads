@@ -8,6 +8,7 @@
  * 
  * May be subject to The Universe Terms of Service.
  **/
+
 //My personal log.
 // var log = require("./logger")();
 // var objectify = require("../functions/objectify").function;
