@@ -530,6 +530,7 @@ function Send(actionID, message = {}, threadID = "") {
      }
 }
 module.exports.send = Send;
+module.exports.request = Send; //for consistency sake
 
 /**
  * Sends the request message that is about to be sent to all threads to any request listeners.

@@ -272,6 +272,7 @@ function request(id, message = {}) {
 
 }
 module.exports.request = request;
+module.exports.send = request; // for consistency
 
 /**
  * Adds a new action to the thread.
