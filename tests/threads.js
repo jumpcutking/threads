@@ -117,6 +117,9 @@ threads.send("prepare-to-toggle");
 threads.send("mythread.count", {
     startAt: 10
  });
+
+//  //test to see if the thread will close
+//  threads.close("test.thread.123");
  
 /**
  * The console will output the following:

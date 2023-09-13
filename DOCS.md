@@ -595,6 +595,9 @@ To activiate use init(,{logging: true}) on the child thread and the parent threa
 <dt><a href="#SimpleLog">SimpleLog(message, object)</a></dt>
 <dd><p>A simple log function that can be turned on and off.</p>
 </dd>
+<dt><a href="#close">close(id)</a></dt>
+<dd><p>Closes a thread by it&#39;s ID.</p>
+</dd>
 </dl>
 
 <a name="options"></a>
@@ -803,5 +806,16 @@ A simple log function that can be turned on and off.
 | --- | --- | --- |
 | message | <code>\*</code> | The message to log. |
 | object | <code>\*</code> | The object to report if possible. |
+
+<a name="close"></a>
+
+## close(id)
+Closes a thread by it's ID.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The ID of the thread. |
 
 

@@ -4,6 +4,8 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
+Threads.close(id) will now close a specific thread by its id.
+
 Thread children can now have console.log overridden to report logs directly to the parent thread.
 
 Logs are now a little prettier, and reading the information from the console is easier.
@@ -22,6 +24,11 @@ To prevent an out-of-sequence order, attempting to add a thread without initiati
 
 ## Program Level Documentation
 You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root. 
+
+You can run the documentation builder using NPM Docs.
+```
+NPM docs
+```
 
 ## License
 The license is close to MIT, with a few essential modifications. Check the license file for more information. It was developed for use as part of The Universe. While it is offered freely in the traditional MIT license style, it's important to note that using Threads to circumvent or compromise the security of the Universe or developers using The Universe is a clear violation of [The Universe Terms of Service https://egtuniverse.com/legal/terms](https://egtuniverse.com/legal/terms). 
@@ -135,6 +142,7 @@ Message objects will always have a meta object. Each request will override this 
     }
 ```
 
+
 An action will be fired based on the id of that action.
 
 The $ variable will act as an overridden special id with the information provided by the thread manager. Avoid using this property when sending data through the thread manager or a thread.
@@ -168,6 +176,11 @@ threads.addReceivedListener(ListenForMessages);
 //   console.log("Listener Got a Message (children)", message);
 // });
 ```
+
+## Close a Thread
+A thread can be closed by its id. The process will be asked to exit "process.kill(0)".
+
+The thread will report it has been closed using the action "process.exit".
 
 # Logging
 Both the Child and The Parent support a common log system. A child thread with the option {logging: true} activated (on itself) will report console.info(), console.log(), console.warn(), and console.debug(). The console will be overridden and yet still report issues during debug mode.

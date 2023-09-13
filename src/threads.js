@@ -841,6 +841,21 @@ function SimpleLog(message, object = {}) {
     }
 }
 
+/**
+ * Closes a thread by it's ID.
+ * @param {*} id The ID of the thread.
+ */
+function close(id) {
+    var thread = my.threads.search(id);
+    if (thread) {
+        console.log(`Closing thread ${id}`)
+        thread.process.kill(0);
+    } else { 
+        throw new Error(`Thread ${id} not found.`);
+    }
+    // my.threads.search(id)?.process.kill();
+} module.exports.close = close;
+
 // /**
 //  * @deprecated
 //  * Depreciated. Should the thread output extra log messages?
