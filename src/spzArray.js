@@ -78,6 +78,13 @@ function search(id) {
 
   //search for the id
   for (var i = 0; i < this.registry.length; i++) {
+
+    //if the item is undefined get rid of it
+    if (typeof this.registry[i] == "undefined") {
+      this.registry.splice(i,1);
+      continue;
+    }
+
     if ("id" in this.registry[i]) {
       if (this.registry[i].id == id)  {
         return this.registry[i];
@@ -111,7 +118,8 @@ function remove(id) {
   //search for ud
   for (var i = 0; i < this.registry.length; i++) {
     if (this.registry[i].id == id)  {
-      delete this.registry[i];
+      //delete this.registry[i];
+      this.registry.splice(i,1);
       return true;
     }
   }
