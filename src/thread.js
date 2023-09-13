@@ -131,14 +131,13 @@ function init(_options = {}) {
 
     }
 
-}  
-module.exports.init = init;
-
+}  module.exports.init = init;
 
 var OverideConsoleOptions = {
     hasRun: false,
     console: {}
 };
+
 function OverideConsole() {
     console.log("Overiding console.");
 
@@ -162,7 +161,7 @@ function OverideConsole() {
  * @param {*} data The object sent from the thread manager. Including the threadID (.threadId).
  */
 function Startup(data) {
-    // console.log("Startup", data);
+    console.log("Startup", data);
     options.id = data.threadId;
 }
 
