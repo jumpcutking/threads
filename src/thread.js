@@ -17,6 +17,7 @@
  * debug: if activated, no messages will be sent to the thread manager.
  * keepAlive: the thread will stay active awaiting further requests until closed.
  * logging: if true, the thread will log messages to the thread manager. It will also overide console.
+ * quitOnException: if true, the thread will quit when an exception is thrown.
  */
 var options = {
     id: "threads.thread",
@@ -24,7 +25,8 @@ var options = {
     closeAction: "thread.close",
     debug: false,
     keepAlive: true,
-    logging: false
+    logging: false,
+    quitOnException: true
 }
 
 /**
@@ -43,6 +45,13 @@ module.exports.options = options;
 /**
  * Set up the child thread.
  * @param {Object} _options The options to set up the thread with.
+ * - id: the name of the thread
+ * - verbose: whether to log verbose messages
+ * - closeAction: the action to fire when the thread is closed
+ * - debug: if activated, no messages will be sent to the thread manager.
+ * - keepAlive: the thread will stay active awaiting further requests until closed.
+ * - logging: if true, the thread will log messages to the thread manager. It will also overide console.
+ * - quitOnException: if true, the thread will quit when an exception is thrown.
  */
 function init(_options = {}) {
 
@@ -71,6 +80,10 @@ function init(_options = {}) {
 
     if ("logging" in _options) {
         options.logging = _options.logging;
+    }
+
+    if ("quitOnException" in _options) {
+        options.quitOnException = _options.quitOnException;
     }
 
     my.actions = new spzArr(`thread.actions`);
@@ -115,7 +128,7 @@ function init(_options = {}) {
         }`);
     });
 
-    addAction("thread.close", Close);
+    addAction(options.closeAction, Close);
     addAction("thread.startup", Startup);
 
     if (options.keepAlive) {
@@ -130,6 +143,23 @@ function init(_options = {}) {
         OverideConsole();
 
     }
+
+    /**
+     * The thread object will output log messages if verbose is turned on.
+     */
+    process.on('uncaughtException', (err) => {
+
+        //convert error to json
+        err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+
+        log("process.uncaught", "An uncaught exception occurred.", err);
+
+        if (options.quitOnException) {
+            process.exit(2);
+        }
+
+        // console.error('Asynchronous error caught.', err);
+    });
 
 }  module.exports.init = init;
 
@@ -310,15 +340,3 @@ module.exports.list = list;
 //     options.verbose = verbose;
 // } module.exports.SetVerbose = SetVerbose;
 
-
-/**
- * The thread object will output log messages if verbose is turned on.
- */
-process.on('uncaughtException', (err) => {
-
-    //convert error to json
-    err = JSON.stringify(err, Object.getOwnPropertyNames(err));
-
-    log("process.uncaught", "An uncaught exception occurred.", err);
-    // console.error('Asynchronous error caught.', err);
-});

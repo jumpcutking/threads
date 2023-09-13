@@ -118,8 +118,12 @@ threads.send("mythread.count", {
     startAt: 10
  });
 
- //test to see if the thread will close
+//  //test to see if the thread will close
+//  //The thread will be asked to quit and may continue to process items.
 //  threads.close("test.thread.123");
+
+//  //force quite a thread - terminate without processing remaining items
+//  threads.forceQuit("test.thread.123");
  
 /**
  * The console will output the following:

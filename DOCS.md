@@ -343,7 +343,8 @@ verbose: whether to log verbose messages
 closeAction: the action to fire when the thread is closed
 debug: if activated, no messages will be sent to the thread manager.
 keepAlive: the thread will stay active awaiting further requests until closed.
-logging: if true, the thread will log messages to the thread manager. It will also overide console.</p>
+logging: if true, the thread will log messages to the thread manager. It will also overide console.
+quitOnException: if true, the thread will quit when an exception is thrown.</p>
 </dd>
 <dt><a href="#buffer">buffer</a></dt>
 <dd><p>The buffer for incoming data.</p>
@@ -393,6 +394,7 @@ closeAction: the action to fire when the thread is closed
 debug: if activated, no messages will be sent to the thread manager.
 keepAlive: the thread will stay active awaiting further requests until closed.
 logging: if true, the thread will log messages to the thread manager. It will also overide console.
+quitOnException: if true, the thread will quit when an exception is thrown.
 
 **Kind**: global variable  
 <a name="buffer"></a>
@@ -410,7 +412,7 @@ Set up the child thread.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _options | <code>Object</code> | The options to set up the thread with. |
+| _options | <code>Object</code> | The options to set up the thread with. - id: the name of the thread - verbose: whether to log verbose messages - closeAction: the action to fire when the thread is closed - debug: if activated, no messages will be sent to the thread manager. - keepAlive: the thread will stay active awaiting further requests until closed. - logging: if true, the thread will log messages to the thread manager. It will also overide console. - quitOnException: if true, the thread will quit when an exception is thrown. |
 
 <a name="Startup"></a>
 
@@ -596,7 +598,10 @@ To activiate use init(,{logging: true}) on the child thread and the parent threa
 <dd><p>A simple log function that can be turned on and off.</p>
 </dd>
 <dt><a href="#close">close(id)</a></dt>
-<dd><p>Closes a thread by it&#39;s ID.</p>
+<dd><p>Requesta thread to close &quot;thread.close&quot; action on a thread by it&#39;s ID.</p>
+</dd>
+<dt><a href="#kill">kill(id)</a></dt>
+<dd><p>Force quit (kill) a thread by it&#39;s ID.</p>
 </dd>
 </dl>
 
@@ -810,7 +815,18 @@ A simple log function that can be turned on and off.
 <a name="close"></a>
 
 ## close(id)
-Closes a thread by it's ID.
+Requesta thread to close "thread.close" action on a thread by it's ID.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The ID of the thread. |
+
+<a name="kill"></a>
+
+## kill(id)
+Force quit (kill) a thread by it's ID.
 
 **Kind**: global function  
 

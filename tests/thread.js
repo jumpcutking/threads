@@ -6,7 +6,8 @@ thread.init({
     verbose: false,
     debug: false,
     keepAlive: true,
-    logging: true
+    logging: true,
+    quitOnException: false
 });
 
 //activate debug mode thread
@@ -53,13 +54,13 @@ thread.add("mythread.count", async (data) => {
 
 });
 
-/**
- * This is if the parent request the thread to close.
- */
-thread.add("thead.close", async (data) => {
-    console.log("Received the thread.close message", data);
-    process.exit(0);
-});
+// /**
+//  * This is if the parent request the thread to close.
+//  */
+// thread.add("thead.close", async (data) => {
+//     console.log("Received the thread.close message", data);
+//     process.exit(0);
+// });
 
 /**
  * Parent hello action!
@@ -118,3 +119,5 @@ setTimeout(() => {
     console.log("Closing thread.");
     process.exit(0);
 }, 20000);
+
+// throw new Error("Test Error");

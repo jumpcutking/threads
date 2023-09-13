@@ -95,6 +95,7 @@ function init(id = "threads", _options = {}) {
         });
     });
 
+
 }  
 module.exports.init = init;
 
@@ -738,6 +739,39 @@ function detialsOfThread(thread) {
  * @param {*} message 
  */
 function receivedLog(message) {
+
+    if (message.action == "process.uncaught") {
+
+        var nObject = {...message.objects};
+        delete nObject.stack;
+        delete nObject.message;
+
+        if (Object.keys(nObject).length == 0) {
+            sharePrettyLog({
+                thread: message["$"].threadId,
+                action: "Console",
+                message: "error",
+                objects: [`An uncaught error has occured in thread ${message["$"].threadId}.
+    ${message.objects.message}
+    ${message.objects.stack}`]
+            });
+            return;
+
+        } else {
+
+            sharePrettyLog({
+                thread: message["$"].threadId,
+                action: "Console",
+                message: "error",
+                objects: [`An uncaught error has occured in thread ${message["$"].threadId}.
+    ${message.objects.message}
+    ${message.objects.stack}`, nObject]
+            });
+            return;
+        }
+        // return;
+   }
+
     // console.log(message);
     if (options.logging) {
         if ((message.action == "Console") && (message.message == "log" ||
@@ -842,10 +876,27 @@ function SimpleLog(message, object = {}) {
 }
 
 /**
- * Closes a thread by it's ID.
+ * Requesta thread to close "thread.close" action on a thread by it's ID.
  * @param {*} id The ID of the thread.
  */
 function close(id) {
+    var thread = my.threads.search(id);
+    if (thread) {
+        console.log(`Closing thread ${id}`);
+        Send("thread.close", {
+            close: true
+        }, id);
+    } else { 
+        throw new Error(`Thread ${id} not found.`);
+    }
+    // my.threads.search(id)?.process.kill();
+} module.exports.close = close;
+
+/**
+ * Force quit (kill) a thread by it's ID.
+ * @param {*} id The ID of the thread.
+ */
+function kill(id) {
     var thread = my.threads.search(id);
     if (thread) {
         console.log(`Closing thread ${id}`)
@@ -854,7 +905,10 @@ function close(id) {
         throw new Error(`Thread ${id} not found.`);
     }
     // my.threads.search(id)?.process.kill();
-} module.exports.close = close;
+} module.exports.forceQuit = kill;
+module.exports.kill = kill;
+
+
 
 // /**
 //  * @deprecated

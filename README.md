@@ -4,7 +4,8 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
-Threads.close(id) will now close a specific thread by its id.
+Threads.forceQuit(id) will now terminate a specific thread by it's id.
+Threads.close(id) will now request a thread to close by it's id.
 
 Thread children can now have console.log overridden to report logs directly to the parent thread.
 
@@ -27,11 +28,11 @@ You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DO
 
 You can run the documentation builder using NPM Docs.
 ```
-NPM docs
+NPM run docs
 ```
 
-## License
-The license is close to MIT, with a few essential modifications. Check the license file for more information. It was developed for use as part of The Universe. While it is offered freely in the traditional MIT license style, it's important to note that using Threads to circumvent or compromise the security of the Universe or developers using The Universe is a clear violation of [The Universe Terms of Service https://egtuniverse.com/legal/terms](https://egtuniverse.com/legal/terms). 
+## MIT License
+Threads was developed for use as part of The Universe. While it is offered freely in the traditional MIT license style, it's important to note that using Threads to circumvent or compromise the security of the Universe or developers using The Universe is a clear violation of [The Universe Terms of Service https://egtuniverse.com/legal/terms](https://egtuniverse.com/legal/terms). 
 
 # Thread Manager
 The thread manager is a short module designed to enable messages to be sent or received from both the threads and the parent process (running the thread manager.) It's a unique and helpful messaging system that is easily expanded. For example, sending a message by its ID to all threads or a specific thread is simple.
@@ -200,6 +201,8 @@ The thread manager comes with a child thread management object. This will receiv
     thread.init();
 ```
 
+A child thread will receive any uncaught exception and report it to the parent. A child thread will stay alive to receive further commands. You can change this behavior using the initialization options "keepAlive" and "quitOnException."
+
 ## Debugging a Thread without the Thread Manager
 A child thread can be run independently from the thread manager by activating debug mode and running the script itself. Add {debug: true} to start debug mode in the options property. You can "test" messages from the thread manager by calling the thread.handleMessage function.
 
@@ -212,7 +215,8 @@ thread.init({
     verbose: false, // silence thread specific log messages
     debug: false, // activate debug mode
     keepAlive: true, // Keep the thread alive for futher actions
-    logging: true // Activate log overide through console.log();...
+    logging: true, // Activate log overide through console.log();...
+    quitOnException: false // should an uncaught exception require the thread to close
 });
 
 /** Test Thread Requests */
