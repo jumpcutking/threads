@@ -119,7 +119,7 @@ threads.send("mythread.count", {
  });
 
  //test to see if the thread will close
- threads.close("test.thread.123");
+//  threads.close("test.thread.123");
  
 /**
  * The console will output the following:
