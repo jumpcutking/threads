@@ -113,7 +113,7 @@ threads.send("hello world", {
 threads.send("prepare-to-toggle");
 ```
 
-### Direct Requests (Direct Messaging a Thread)
+## Direct Requests (Direct Messaging a Thread)
 A request can be dispatched to a thread ID registered to the Thread Manager. To do so, add a thread ID to the third parameter.
 
 ```Javascript

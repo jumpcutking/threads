@@ -78,8 +78,10 @@ function search(id) {
 
   //search for the id
   for (var i = 0; i < this.registry.length; i++) {
-    if (this.registry[i].id == id)  {
-      return this.registry[i];
+    if ("id" in this.registry[i]) {
+      if (this.registry[i].id == id)  {
+        return this.registry[i];
+      }
     }
   }
 
