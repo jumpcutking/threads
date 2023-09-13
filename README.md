@@ -178,7 +178,7 @@ threads.addReceivedListener(ListenForMessages);
 ```
 
 ## Close a Thread
-A thread can be closed by its id. The process will be asked to exit "process.kill(0)".
+A thread can be closed by its id. The process will be asked to exit "process.kill(1)".
 
 The thread will report it has been closed using the action "process.exit".
 
