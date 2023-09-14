@@ -90,10 +90,19 @@ function init(id = "threads", _options = {}) {
 
     //if the Thread Manager's process is closing, close all threads
     process.on('exit', function () {
+
+        // are there any threads left?
+        if (my.threads.registry.length == 0) {
+            // SimpleLog("No threads to close.");
+            return;
+        }
+
         SimpleLog("Process is exiting. Closing all threads.");
+
         Send(options.closeID, {
             exitType: "process.exit" 
         });
+
     });
 
 
