@@ -191,7 +191,7 @@ function OverideConsole() {
  * @param {*} data The object sent from the thread manager. Including the threadID (.threadId).
  */
 function Startup(data) {
-    console.log("Startup", data);
+    log_verbose("Startup", `Thread: ${options.id} is starting up.`, data);
     options.id = data.threadId;
 }
 
