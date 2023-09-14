@@ -10,6 +10,7 @@
  **/
 
 var { spawn } = require('child_process');
+var util = require('util');
 
 //let's us log colors to the console, for easy reading
 var colorOf = require("colors");
@@ -654,18 +655,54 @@ function handleMessage(thread, message) {
 
     try {
         //if not a json string, it must be something else - share data to console
-        if (message[0] != "{") {
-            // console.log("***** Not JSON");
-            // console.dir(message); <-- see the actual real data in the console (not trimmed by console.log)
+        // if (message[0] != "{") {
+        //     // console.log("***** Not JSON");
+        //     // console.dir(message); <-- see the actual real data in the console (not trimmed by console.log)
+        //     SimpleLog("Message not JSON.", {
+        //         thread: detialsOfThread(thread),
+        //         message: message
+        //     });
+        //     return;
+        // }
+
+        //convert the message to a json object
+        try {
+            message = JSON.parse(message);
+        } catch (error) {
             SimpleLog("Message not JSON.", {
+                thread: detialsOfThread(thread),
+                message: message,
+                error: error
+            });
+            return;
+        }
+
+        //is message an object
+        if (typeof message !== "object") {
+            SimpleLog("Message not an object.", {
                 thread: detialsOfThread(thread),
                 message: message
             });
             return;
         }
 
-        //convert the message to a json object
-        message = JSON.parse(message);
+        //does message have an id
+        if (!("$" in message)) {
+            SimpleLog("Message does not have a global prefix ($).", {
+                thread: detialsOfThread(thread),
+                message: message
+            });
+            return;
+        }
+
+        //does message have an id
+        if (!("id" in message.$)) {
+            SimpleLog("Message does not have an id ($.id).", {
+                thread: detialsOfThread(thread),
+                message: message
+            });
+            return;
+        }
 
         //send to listeners - only json objects please 
         //Perhabs should check for a $.id property to validate
@@ -839,10 +876,12 @@ function sharePrettyLog(msg) {
         if (msg.objects.length == 0) {
             logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`);
         } else {
-            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`, msg.objects);
+            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`,
+                util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
         }
     } else {
-        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`), msg.objects);
+        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`), 
+            util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
     }
 
 }

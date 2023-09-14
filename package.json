@@ -1,6 +1,6 @@
 {
   "name": "@jumpcutking/threads",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "Threads is a multiple-thread management tool handling a pool of threads and communication between all connected threads for node.js. Threads is a powerful solution to going beyond web workers.",
   "main": "index.js",
   "directories": {
