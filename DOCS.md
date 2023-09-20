@@ -681,11 +681,15 @@ Warning: This thread manager is designed for one manager per application.
          Threads attach to the same manager. Only call this once!
 
 **Kind**: global function  
+**Throws**:
+
+- <code>Error</code> If the thread manager has already been initialized.
+
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | id | <code>string</code> | <code>&quot;threads&quot;</code> | The id of the thread manager. |
-| _options | <code>\*</code> |  | The options to set up the thread manager with.   - id: The id for the thread manager.  - verbose: Whether to output verbose logs.  - closeID: The id to close the thread.  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread. |
+| _options | <code>\*</code> |  | The options to set up the thread manager with.   - id: The id for the thread manager.  - verbose: Whether to output verbose logs.  - closeID: The id to close the thread.  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.  - reportStderr: Will errors from the process error channel be reported directly? Disable this to prevent duplicate error messages (exceptions, and console.warn|error will parrot to the thread manager on stderr resulting in duplicate messages). |
 
 <a name="addRequestsListener"></a>
 
