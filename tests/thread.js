@@ -85,4 +85,6 @@ thread.add("thread.startup", async (data) => {
 
     console.log("Thread is ready.", thread.list());
 
+    // throw new Error("Test Error");
+
 });

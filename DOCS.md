@@ -595,6 +595,7 @@ Options:     All options are optional.
              disableActions: true|false      Disable the default action handler.
              spawn: {
                  command: &quot;node&quot;,            The command to spawn the thread with. Default: node, but can be any command.
+                 args: &quot;&quot; | []               The arguments to pass to the command. The local script is always the first argument.
              }</p>
 </dd>
 <dt><a href="#addAction">addAction(id, handler)</a> ⇒ <code>Boolean</code></dt>
@@ -721,6 +722,7 @@ Options:     All options are optional.
              disableActions: true|false      Disable the default action handler.
              spawn: {
                  command: "node",            The command to spawn the thread with. Default: node, but can be any command.
+                 args: "" | []               The arguments to pass to the command. The local script is always the first argument.
              }
 
 **Kind**: global function  

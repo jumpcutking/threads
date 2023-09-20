@@ -26,6 +26,7 @@ var options = {
     id: "threads",
     verbose: false,
     logging: true,
+    reportStderr: false,
     closeID: "thread.close"
 }
 // module.exports.options = options;
@@ -64,6 +65,7 @@ module.exports.actions = my.actions;
  *  - verbose: Whether to output verbose logs.
  *  - closeID: The id to close the thread.
  *  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
+ *  - reportStderr: Will errors from the process error channel be reported directly? Disable this to prevent duplicate error messages (exceptions, and console.warn|error will parrot to the thread manager on stderr resulting in duplicate messages).
  */
 function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
@@ -80,6 +82,14 @@ function init(id = "threads", _options = {}) {
 
     if ("logging" in _options) {
         options.logging = _options.logging;
+    }
+
+    if ("reportStderr" in _options) {
+        options.reportStderr = _options.reportStderr;
+    }
+
+    if (!options.reportStderr) {
+        console.warn("options.reportStderr is false. Errors from the process error channel will not be reported directly.");
     }
 
     my.threads = new spzArr(`${options.id}.threads`);
@@ -141,6 +151,7 @@ module.exports.addReceivedListener = addReceivedListener;
  *              disableActions: true|false      Disable the default action handler.
  *              spawn: {
  *                  command: "node",            The command to spawn the thread with. Default: node, but can be any command.
+ *                  args: "" | []               The arguments to pass to the command. The local script is always the first argument.
  *              }
  * @param {string} id the id of the thread. Must be unique.
  * @param {*} local the script to spawn
@@ -171,6 +182,24 @@ function add(id, local, options = {}) {
         }
     }
 
+    var commandArgs = [local];
+
+    //If I have additional command args, add them to the commandArgs array.
+    if ("spawn" in options) {
+        if ("args" in options.spawn) {
+
+            //if args is a string and not an array
+            if (typeof options.spawn.args == "string") {
+                //split the string by spaces
+                options.spawn.args = options.spawn.args.split(" ");
+            }
+            
+            commandArgs = [...options.spawn.args];
+            commandArgs.unshift(local);
+
+        }
+    }
+
     try {
         
         var thread = {
@@ -187,10 +216,10 @@ function add(id, local, options = {}) {
 
             SimpleLog("Spwaning process.", {
                 id: id,
-                local: local
+                commandArgs: commandArgs
             });
 
-            thread.process = spawn(spawnOptions.command, [local]);
+            thread.process = spawn(spawnOptions.command, commandArgs);
 
             // set the encoding of the stdout stream to 'utf8'
             thread.process.stdout.setEncoding('utf8'); //may need to change to UTF-32
@@ -270,14 +299,18 @@ function add(id, local, options = {}) {
                 //TO DO: Check if I need to buffer error data as well?
                 data = `${data}`;
 
-                receivedLog({
-                    thread: thread.id,
-                    action: `process.stderr`,
-                    message: `Error in thread: ${id}`,
-                    objects: {
-                        message: data
-                    }
-                });
+                if (options.reportStderr) {
+
+                    receivedLog({
+                        thread: thread.id,
+                        action: `process.stderr`,
+                        message: `Error in thread: ${id}`,
+                        objects: {
+                            message: data
+                        }
+                    });
+
+                }
 
                 try {
                     if ("onError" in thread.options) {

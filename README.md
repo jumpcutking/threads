@@ -4,6 +4,12 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
+### v1.4.1
+Added options.reportStderr to the Thread Manager, which will now default to false. This prevents parroting (duplicate messages) of uncaught exceptions, console.error|warn, and other error messages. You will want to activate report errors if you're using a non-traditional process, such as something other than Node (like an AV Encoder). 
+
+Added support for custom command arguments; this helps add "--trace-warnings" and other command line arguments. Either pass a string to have it automatically split on "space" or take granular control (say for file names) by passing an array of strings that will not be modified.
+
+### v1.4.0
 Threads now support adding multiple events to actions on both the parent and child threads. This can be done naturally by adding new events to the same ID. Threads.addAction and Thread.add will return the ID of the current event to make it easy to remove that event when needed. Use the new function Threads.removeActionAt(id, index) and Thread.removeAt(id, index) to remove the event listener by its index. 
 
 ## Program Level Documentation
@@ -66,6 +72,20 @@ thread.add("test.thread","./thread.js", {
     //except for the threads.threads.search(id).send() method.
     disableActions: false
 });
+
+/*
+ * Options:     All options are optional.
+ *              onData: function(data) { ... }  Return from the thread.
+ *              onError: function(data) { ... } Return from the thread on an error
+ *              onExit: function(code) { ... }  Return from the thread when it exits.
+ *              onSend: function(message) { ... }  Reports what's being sent to a thread before it is sent.
+ *              disableActions: true|false      Disable the default action handler.
+ *              spawn: {
+ *                  command: "node",            The command to spawn the thread with. Default: node, but can be any command.
+ *                  args: "" | []               The arguments to pass to the command. The local script is always appended as the first argument.
+ *              }
+ */
+
 ```
 
 ## Spawn a process outside of Node

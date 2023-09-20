@@ -9,7 +9,12 @@ threads.init(`${id}.threads`, {
 });
 
 //add a thread
-threads.add("test.thread.123","./thread.js");
+threads.add("test.thread.123","./thread.js", {
+    spawn: {
+        command: "node",
+        args: "--trace-warnings"
+    }
+});
 
 var toggle = true;
 threads.addAction("toggle", async (data) => {
