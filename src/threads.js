@@ -956,16 +956,26 @@ function sharePrettyLog(msg) {
     if (typeof firstObj === "string") {
         msg.objects.shift();
 
+        //if I have only one data object (second arg), don't wrap it in an array.
+        if (msg.objects.length == 1) {
+            msg.objects = msg.objects[0];
+        }
+
+        //Util.inspect produces a string not an object, so we append it at such.
+
         //check to see if objects is now an empty array
         if (msg.objects.length == 0) {
             logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`);
         } else {
-            logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`,
-                util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
+            //insert a tab
+            // var tab = "\t";
+            logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj} `
+            + colorOf.white(util.inspect(msg.objects, {showHidden: false, depth: null, colors: true})));
         }
+
     } else {
-        logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`), 
-            util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
+        logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ' '
+        + util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
     }
 
 }

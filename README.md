@@ -4,6 +4,18 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
+
+### v1.4.2
+The update console system is now accessible to the parent thread. You can initialize it by adding this at the top of your script. Also included general improvements on how Threads reports console messages from children.
+
+```Javascript
+var threadConsole = require("../index.js").console;
+threadConsole.init(null, {
+  usePrettyLog: true
+});
+```
+
+
 ### v1.4.1
 Added options.reportStderr to the Thread Manager, which will now default to false. This prevents parroting (duplicate messages) of uncaught exceptions, console.error|warn, and other error messages. You will want to activate report errors if you're using a non-traditional process, such as something other than Node (like an AV Encoder). 
 

@@ -1,5 +1,12 @@
 //intialize the threads manager
 var id = "TestThreadManager";
+
+//Let's use Thread's beautiful console features for consistent messages from the logger.
+var threadConsole = require("../index.js").console;
+threadConsole.init(null, {
+  usePrettyLog: true
+});
+
 console.log(`Starting the test, the thread manager is identified as ${id}`);
 
 var { threads } = require("../index.js");

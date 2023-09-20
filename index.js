@@ -12,6 +12,7 @@
 var threads = require("./src/threads.js");
 var thread = require("./src/thread.js");
 var santize = require("./src/sanitize.js");
+var console = require("./src/console.js");
 
 /**
  *  Threads manager.
@@ -19,5 +20,6 @@ var santize = require("./src/sanitize.js");
 module.exports = {
     threads: threads,
     thread: thread,
-    sanitize: santize
+    sanitize: santize,
+    console: console
 };

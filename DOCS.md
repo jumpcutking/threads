@@ -23,16 +23,19 @@ Justin K Kazmierczak
 ## Functions
 
 <dl>
-<dt><a href="#zconsole">zconsole()</a> ⇒ <code>Object</code></dt>
-<dd></dd>
 <dt><a href="#logDelegate">logDelegate(type, args, logger)</a></dt>
 <dd><p>Sets up the overiding log function.</p>
 </dd>
-<dt><a href="#init">init(_logDelegate)</a></dt>
+<dt><a href="#zconsole">zconsole()</a> ⇒ <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#init">init(_logDelegate, options)</a></dt>
 <dd><p>Initializes the console to report to the parent thread.</p>
 <p>During debug mode, a child thread will report to the console
 as normal otherwise the console on the child thread will be
 silenced.</p>
+</dd>
+<dt><a href="#sharePrettyLog">sharePrettyLog(msg, logHandler)</a></dt>
+<dd><p>Shares a Pretty Log message in the terminal</p>
 </dd>
 </dl>
 
@@ -48,14 +51,6 @@ The console contrustor, for creating and working with the console.
 A child thread's new console object, used to log messages to the console.
 
 **Kind**: global variable  
-<a name="zconsole"></a>
-
-## zconsole() ⇒ <code>Object</code>
-**Kind**: global function  
-**Returns**: <code>Object</code> - The new console object.  
-**Jumpcutking/threads**: - Child Console Object
-This replaces the normal node:console object for easy reporting to the 
-managing parent thread.  
 <a name="logDelegate"></a>
 
 ## logDelegate(type, args, logger)
@@ -69,9 +64,17 @@ Sets up the overiding log function.
 | args | <code>\*</code> |  |
 | logger | <code>\*</code> | If you'd like the output to go to the console, use this function. Modify args as needed. |
 
+<a name="zconsole"></a>
+
+## zconsole() ⇒ <code>Object</code>
+**Kind**: global function  
+**Returns**: <code>Object</code> - The new console object.  
+**Jumpcutking/threads**: - Child Console Object
+This replaces the normal node:console object for easy reporting to the 
+managing parent thread.  
 <a name="init"></a>
 
-## init(_logDelegate)
+## init(_logDelegate, options)
 Initializes the console to report to the parent thread.
 
 During debug mode, a child thread will report to the console
@@ -82,7 +85,20 @@ silenced.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _logDelegate | <code>\*</code> | The function to call when a log is made. The thread creates one and passes it here. |
+| _logDelegate | <code>\*</code> | The function to call when a log is made. The thread creates one and passes it here. If using pretty log, send null or false. |
+| options | <code>\*</code> | The options to set for the console.     usePrettyLog: true/false - whether to show beautiful logs (consisit) in the console. |
+
+<a name="sharePrettyLog"></a>
+
+## sharePrettyLog(msg, logHandler)
+Shares a Pretty Log message in the terminal
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| msg | <code>\*</code> | The message object containing the console.f(...args) from the child. |
+| logHandler | <code>\*</code> | The function to call to log the message. Do NOT USE console.log! |
 
 
 # sanitize.js
