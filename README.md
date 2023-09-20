@@ -83,6 +83,17 @@ threads.addAction("parent-count", async (data) => {
 });
 ```
 
+## Start up action.
+After a thread has been spawned, it will be initialized with its thread ID. To start actions immediately after the thread has been started, use the action "thread.startup" in the child thread.
+
+```Javascript
+thread.add("thread.startup", async (data) => {
+    console.log("The thread has started!");
+
+    //do the first run stuff here
+});
+```
+
 ## Create Multiple Events on Actions
 You can add additional events to an action by the same method. addAction will also return the index of the newly created event listener.
 
