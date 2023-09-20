@@ -66,6 +66,7 @@ module.exports.actions = my.actions;
  *  - closeID: The id to close the thread.
  *  - logging: Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
  *  - reportStderr: Will errors from the process error channel be reported directly? Disable this to prevent duplicate error messages (exceptions, and console.warn|error will parrot to the thread manager on stderr resulting in duplicate messages).
+ * @throws {Error} If the thread manager has already been initialized. 
  */
 function init(id = "threads", _options = {}) {
     SimpleLog(`Setting up thread manager: ${id}`, {
@@ -89,7 +90,7 @@ function init(id = "threads", _options = {}) {
     }
 
     if (!options.reportStderr) {
-        console.warn("options.reportStderr is false. Errors from the process error channel will not be reported directly.");
+        SimpleLog("options.reportStderr is false. Errors from the process error channel will not be reported directly.");
     }
 
     my.threads = new spzArr(`${options.id}.threads`);
