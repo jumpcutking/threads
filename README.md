@@ -15,7 +15,6 @@ threadConsole.init(null, {
 });
 ```
 
-
 ### v1.4.1
 Added options.reportStderr to the Thread Manager, which will now default to false. This prevents parroting (duplicate messages) of uncaught exceptions, console.error|warn, and other error messages. You will want to activate report errors if you're using a non-traditional process, such as something other than Node (like an AV Encoder). 
 
