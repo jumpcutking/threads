@@ -220,12 +220,17 @@ It will call onAdd after adding a new item.</p>
 <dd><p>Searches for an item in the current registry by it&#39;s id.</p>
 </dd>
 <dt><a href="#remove">remove(id)</a> ⇒ <code>Boolean</code></dt>
-<dd><p>Removes an item from the registry.</p>
+<dd><p>Removes the entire item from the registry (and all sub items).</p>
+</dd>
+<dt><a href="#removeAt">removeAt(id, indexOf)</a></dt>
+<dd><p>Removes an item from the registry, at the specific index.
+If we have removed the last item in the array, we will remove the entire item.
+If the index is not found, you will receive an exception.</p>
 </dd>
 <dt><a href="#NormalizeID">NormalizeID(id)</a> ⇒ <code>String</code></dt>
 <dd><p>It is recommended to trim ids. You could also lowercase for easy acessing/searching.</p>
 </dd>
-<dt><a href="#add">add(item)</a></dt>
+<dt><a href="#add">add(item, allowMultiple)</a> ⇒ <code>Number</code></dt>
 <dd></dd>
 <dt><a href="#SimpleLog">SimpleLog(message, object)</a></dt>
 <dd><p>A simple log function that can be turned on and off.</p>
@@ -275,7 +280,7 @@ Searches for an item in the current registry by it's id.
 <a name="remove"></a>
 
 ## remove(id) ⇒ <code>Boolean</code>
-Removes an item from the registry.
+Removes the entire item from the registry (and all sub items).
 
 **Kind**: global function  
 **Returns**: <code>Boolean</code> - the item or false  
@@ -283,6 +288,20 @@ Removes an item from the registry.
 | Param | Type |
 | --- | --- |
 | id | <code>String</code> | 
+
+<a name="removeAt"></a>
+
+## removeAt(id, indexOf)
+Removes an item from the registry, at the specific index.
+If we have removed the last item in the array, we will remove the entire item.
+If the index is not found, you will receive an exception.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The id of the items. |
+| indexOf | <code>\*</code> | the index of the individual item to remove. |
 
 <a name="NormalizeID"></a>
 
@@ -298,17 +317,19 @@ It is recommended to trim ids. You could also lowercase for easy acessing/search
 
 <a name="add"></a>
 
-## add(item)
+## add(item, allowMultiple) ⇒ <code>Number</code>
 **Kind**: global function  
+**Returns**: <code>Number</code> - The index of the item in the registry. NO LONGER Returns True. Use this to remove a listerner at a later time.  
 **Throws**:
 
 - <code>Error</code> If the object to add to the registry is not valid. (No ID as String).
 Adds an item with an id to the registry.
 
 
-| Param | Type |
-| --- | --- |
-| item | <code>\*</code> | 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| item | <code>\*</code> |  | The item to add to the registry. |
+| allowMultiple | <code>Boolean</code> | <code>false</code> | Whether to allow multiple items with the same id. |
 
 <a name="SimpleLog"></a>
 
@@ -381,6 +402,9 @@ quitOnException: if true, the thread will quit when an exception is thrown.</p>
 </dd>
 <dt><a href="#list">list()</a> ⇒ <code>Object</code></dt>
 <dd><p>List all the threads and listerners.</p>
+</dd>
+<dt><a href="#removeAt">removeAt(id, index)</a></dt>
+<dd><p>Removes an action from the thread.</p>
 </dd>
 </dl>
 
@@ -500,6 +524,18 @@ List all the threads and listerners.
 
 **Kind**: global function  
 **Returns**: <code>Object</code> - {threads: [], listerners: []}  
+<a name="removeAt"></a>
+
+## removeAt(id, index)
+Removes an action from the thread.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The id of the action to remove. |
+| index | <code>\*</code> | The index of the action to remove. |
+
 
 # threads.js
 Thread manager for spawned node processes.
@@ -563,6 +599,9 @@ Options:     All options are optional.
 </dd>
 <dt><a href="#addAction">addAction(id, handler)</a> ⇒ <code>Boolean</code></dt>
 <dd><p>Adds an action to the thread manager.</p>
+</dd>
+<dt><a href="#removeActionAt">removeActionAt(id, index)</a></dt>
+<dd><p>Removes an action from the thread manager.</p>
 </dd>
 <dt><a href="#list">list()</a> ⇒ <code>Object</code></dt>
 <dd><p>List all the threads and listerners.</p>
@@ -705,6 +744,18 @@ Adds an action to the thread manager.
 | --- | --- | --- |
 | id | <code>string</code> | The id of the action. |
 | handler | <code>\*</code> | The function to call when the action is requested. |
+
+<a name="removeActionAt"></a>
+
+## removeActionAt(id, index)
+Removes an action from the thread manager.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The id of the action to remove. |
+| index | <code>\*</code> | The index of the action to remove. |
 
 <a name="list"></a>
 

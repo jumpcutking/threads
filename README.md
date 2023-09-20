@@ -4,24 +4,7 @@ Threads is a multiple-thread management tool handling a pool of threads and comm
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
 ## What's New
-Threads.forceQuit(id) will now terminate a specific thread by it's id.
-Threads.close(id) will now request a thread to close by it's id.
-
-Thread children can now have console.log overridden to report logs directly to the parent thread.
-
-Logs are now a little prettier, and reading the information from the console is easier.
-
-Verbose mode is now activated on init().
-
-Enabling logging {logging: true} on a child thread will override the console.
-
-You can now request actions without data. This is great to close a thread or toggle a variable.
-
-Hush has been replaced with logging. Activate {logging: true} on both the Thread manager and the child.
-
-I've enhanced the error handling object to report when an action failed. Previously, you would have gotten the catch-all error when reporting JSON parsing errors. Generally, you'll never get a JSON parsing error from within the thread.js scripting modules. However, you may want to check the logic of additional processes that support threads.js.
-
-To prevent an out-of-sequence order, attempting to add a thread without initiating the thread manager will cause an error. Call threads.init() before calling threads.add.
+Threads now support adding multiple events to actions on both the parent and child threads. This can be done naturally by adding new events to the same ID. Threads.addAction and Thread.add will return the ID of the current event to make it easy to remove that event when needed. Use the new function Threads.removeActionAt(id, index) and Thread.removeAt(id, index) to remove the event listener by its index. 
 
 ## Program Level Documentation
 You can find it in [DOCS.md](https://github.com/jumpcutking/threads/blob/main/DOCS.md), you can recreate the docs using createDocs.js in the project's root. 
@@ -99,6 +82,12 @@ threads.addAction("parent-count", async (data) => {
     console.log(`Parent thread count: ${data.count}`, data);
 });
 ```
+
+## Create Multiple Events on Actions
+You can add additional events to an action by the same method. addAction will also return the index of the newly created event listener.
+
+## Remove Event Listeners and Actions
+An event listener can be removed by it's known index using the Threads.removeActionAt(id, index). You can use Threads.remove(id) to remove the entire action and all associated listeners.
 
 ## Send a Request to all Threads
 A request is sent to all threads by default or by setting a wildcard (*) as the thread ID in the threads.send function.
@@ -284,6 +273,12 @@ thread.add("hello world", async (data) => {
 });
 ```
 
+## Create Multiple Events on Actions
+You can add additional events to an action by the same method. Thread.add will also return the index of the newly created event listener.
+
+## Remove Event Listeners and Actions
+An event listener can be removed by it's known index using the Thread.removeAt(id, index). You can use Thread.remove(id) to remove the entire action and all associated listeners.
+
 ## Child Thread Request (Send a Message to the Thread Manager)
 A child can make a request to the parent thread (or rather the Thread Manager) by requesting an action to be fired by it's ID.
 
@@ -300,7 +295,7 @@ Message objects sent by the thread will include an additional property in the $ 
 {
     $:{
         id: "myactionid"
-        threaded: "my thread" //only threads will provide this property
+        threadId: "my thread" //only threads will provide this property
     },
     (...)
 }

@@ -216,7 +216,7 @@ function handleMessage(message) {
         }
 
         // var message = JSON.parse(message);
-        var handler = my.actions.search(message.$.id)?.handler;
+        var handler = my.actions.search(message.$.id);
         // console.log("Search results...", {
         //     handler: handler,
         //     searchResult: my.actions.search(message.$.id),
@@ -224,7 +224,10 @@ function handleMessage(message) {
         // });
 
         if (handler) {
-             handler(message);
+            //for each hander.items - call the handler
+            for (var i = 0; i < handler.items.length; i++) {
+                handler.items[i].handler(message);
+            }
         } else {
             log("onData.actionNotRegistered", `Requested action: ${message.$.id} is not registered to the thread: ${options.id}.`, {message})
         }
@@ -287,7 +290,7 @@ function addAction(id, handler) {
     return my.actions.add({
         id: id,
         handler: handler
-    });
+    }, true);
 }
 module.exports.addAction = addAction;
 module.exports.add = addAction;
@@ -301,7 +304,7 @@ module.exports.add = addAction;
  */
 function log(action, message, objects = {}) {
     request("log", {
-        thread: options.id,
+        // thread: options.id,
         action: action,
         message: message,
         objects: objects
@@ -331,6 +334,15 @@ function list() {
     }
 }
 module.exports.list = list;
+
+/**
+ * Removes an action from the thread.
+ * @param {*} id The id of the action to remove.
+ * @param {*} index The index of the action to remove.
+ */
+function removeAt(id, index) {
+    my.actions.removeAt(id, index);
+} module.exports.removeAt = removeAt;
 
 
 // /**

@@ -42,7 +42,8 @@ function create(id = "registry") {
       find: search,
       add: add,
       list: list,
-      remove: remove
+      remove: remove,
+      removeAt: removeAt
   };
 }
 
@@ -99,7 +100,7 @@ function search(id) {
 }
 
 /**
- * Removes an item from the registry.
+ * Removes the entire item from the registry (and all sub items).
  * @param {String} id 
  * @returns {Boolean} the item or false
  */
@@ -129,6 +130,46 @@ function remove(id) {
 }
 
 /**
+ * Removes an item from the registry, at the specific index.
+ * If we have removed the last item in the array, we will remove the entire item.
+ * If the index is not found, you will receive an exception.
+ * @param {*} id The id of the items.
+ * @param {*} indexOf the index of the individual item to remove.
+ */
+function removeAt(id, indexOfListener) {
+
+  if (!(santize("string", id))) {
+    SimpleLog(`The ID must be a string.`, {
+      id: id
+    })
+    return false;
+  }
+
+  id = NormalizeID(id);
+
+  var foundItem = this.search(id, false);
+  if (foundItem !== false) {
+    //can I add multiple items with the same id?
+    if (foundItem.items.length > indexOfListener) {
+      //remove the item
+      foundItem.items.splice(indexOfListener, 1);
+
+      //if there are no more items, remove the entire item.
+      if (foundItem.items.length == 0) {
+        this.remove(id);
+      }
+
+      return true;
+    } else {
+      throw new Error("The item's index is not found in the registry.");
+    }
+  } else {
+    throw new Error("The item's id is not found in the registry.");
+  }
+
+} //module.exports.removeAt = removeAt;
+
+/**
  * It is recommended to trim ids. You could also lowercase for easy acessing/searching.
  * @param {String} id The id to normalize. 
  * @returns {String} the normalized id
@@ -141,9 +182,11 @@ function NormalizeID(id) {
 /**
  * @throws {Error} If the object to add to the registry is not valid. (No ID as String).
  * Adds an item with an id to the registry.
- * @param {*} item 
+ * @param {*} item The item to add to the registry.
+ * @param {Boolean} allowMultiple Whether to allow multiple items with the same id.
+ * @returns {Number} The index of the item in the registry. NO LONGER Returns True. Use this to remove a listerner at a later time.
  */
-function add(item) {
+function add(item, allowMultiple = false) {
 
   if (!(santize("object", item))) {
     throw new Error("The item must be an object.");
@@ -160,21 +203,33 @@ function add(item) {
   //ensure your id matches the search protocols - prevent human error
   item.id = NormalizeID(item.id);
 
-  if (this.registry.length < 1) {
-    //I have no items in my registry, so I'm safe.
-  } else {
-    if (this.search(item.id,false) !== false) {
+  var foundItem = this.search(item.id, false);
+  if (foundItem !== false) {
+    //can I add multiple items with the same id?
+    if (allowMultiple == false) {
       throw new Error("The item's id already exists in the registry.");
+    } else {
+      //add the item to the founditem.items
+      foundItem.items.push(item);
+      return foundItem.items.length - 1;
     }
+  } else {
+    //I didn't find the item, so I can add it to the array.
+    this.registry.push({
+      id: item.id,
+      items: [item]
+    });
+
+    return 0;
+    
   }
 
-  this.registry.push(item);
+    SimpleLog(`Added item to registry.`, {
+      adding: item
+    });
 
-  SimpleLog(`Added item to registry.`, {
-    adding: item
-  });
+    // return true;
 
-  return true;
 
 } module.exports = create;
 

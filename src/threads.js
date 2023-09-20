@@ -182,7 +182,8 @@ function add(id, local, options = {}) {
             buffer: ''
         };
 
-        if (my.threads.add(thread)) {
+        //Threads are by one id only.
+        // if (my.threads.add(thread)) {
 
             SimpleLog("Spwaning process.", {
                 id: id,
@@ -329,7 +330,7 @@ function add(id, local, options = {}) {
                 } else {
                     receivedLog({
                         thread: thread.id,
-                        action: `process.creation.notConnected`,
+                        action: `thread.startup.notConnected`,
                         message: `Thread: ${thread.id} not running. Message failed.`,
                         objects: {
                             message: message,
@@ -349,20 +350,25 @@ function add(id, local, options = {}) {
                 managerId: my.id
             })
 
-            return true;
 
-        } else {
-            receivedLog({
-                thread: thread.id,
-                action: `process.creation.failed`,
-                message: `Thread: ${thread.id} not running. Message failed.`,
-                objects: {
-                    message: message
-                }
-            });
+            //moved to the end of the function so the thread's functions are properly set up.
 
-            return false;
-        }
+            try {
+                my.threads.add(thread)
+                return true;
+            } catch (error) {
+
+                receivedLog({
+                    thread: thread.id,
+                    action: `process.creation.failed`,
+                    message: `Thread: ${thread.id} not running. Message failed.`,
+                    objects: {
+                        error: error
+                    }
+                });
+
+                return false;
+            }
 
     } catch (error) {
 
@@ -402,9 +408,23 @@ function addAction(id, handler) {
     return my.actions.add({
         id: id,
         handler: handler
-    });
+    }, true);
 }
 module.exports.addAction = addAction;
+
+/**
+ * Removes an action from the thread manager.
+ * @param {*} id The id of the action to remove.
+ * @param {*} index The index of the action to remove.
+ */
+function removeActionAt(id, index) {
+    SimpleLog("Removing action.", {
+        id: id,
+        index: index
+    });
+
+    my.actions.removeAt(id, index);
+} module.exports.removeActionAt = removeActionAt;
 
 /**
  * List all the threads and listerners.
@@ -466,8 +486,13 @@ function Send(actionID, message = {}, threadID = "") {
             
             if (hasThreads) {
 
+                // console.log("Test threadss",  {
+                //     threads: my.threads.registry,
+                //     items: my.threads.registry[0].items
+                // });
+                
                 my.threads.registry.forEach((thread) => {
-                    thread.send(message);
+                    thread.items[0].send(message);
                 });
 
             } else {
@@ -488,7 +513,7 @@ function Send(actionID, message = {}, threadID = "") {
             try {
                 
                 //send to a specific thread
-                my.threads.search(threadID)?.send(message);
+                my.threads.search(threadID)?.items[0].send(message);
                 sent = true;
 
             } catch (error) {
@@ -719,7 +744,7 @@ function handleMessage(thread, message) {
         SendMessageToReceivedListeners(message);
 
         //is an action registered
-        var action = my.actions.search(message.$.id)?.handler;
+        var action = my.actions.search(message.$.id);
         if (action) {
             SimpleLog("Running found action.", {
                 thread: detialsOfThread(thread),
@@ -727,7 +752,11 @@ function handleMessage(thread, message) {
             });
 
             try {
-                action(message);
+                // for each eventz.items item - call the handler
+                for (var i = 0; i < action.items.length; i++) {
+                    action.items[i].handler(message);
+                }
+                // action(message);
             } catch (error) {
                 receivedLog({
                     thread: thread.id,
@@ -774,9 +803,16 @@ function handleMessage(thread, message) {
  */
 function detialsOfThread(thread) {
     //clone the obect and remove process
-    var details = JSON.parse(JSON.stringify(thread));
-    delete details.process;
-    delete details.buffer;
+    // console.log("Details of thread...", thread);
+    var details = {
+        id: thread.id,
+        local: thread.local,
+        options: thread.options
+    };
+
+    // var details = JSON.parse(JSON.stringify(thread));
+    // delete details.process;
+    // delete details.buffer;
     return details;
 }
 
@@ -787,6 +823,7 @@ function detialsOfThread(thread) {
  */
 function receivedLog(message) {
 
+    // console.log(message);
     if (message.action == "process.uncaught") {
 
         var nObject = {...message.objects};
@@ -795,7 +832,8 @@ function receivedLog(message) {
 
         if (Object.keys(nObject).length == 0) {
             sharePrettyLog({
-                thread: message["$"].threadId,
+                $: message.$,
+                // thread: message["$"].threadId,
                 action: "Console",
                 message: "error",
                 objects: [`An uncaught error has occured in thread ${message["$"].threadId}.
@@ -807,7 +845,8 @@ function receivedLog(message) {
         } else {
 
             sharePrettyLog({
-                thread: message["$"].threadId,
+                $: message.$,
+                // thread: message["$"].threadId,
                 action: "Console",
                 message: "error",
                 objects: [`An uncaught error has occured in thread ${message["$"].threadId}.
@@ -842,6 +881,8 @@ function receivedLog(message) {
  * @param {*} msg The message object containing the console.f(...args) from the child.
  */
 function sharePrettyLog(msg) {
+
+    // console.log(msg);
 
     var logHandler = console.log;
     var color = false;
@@ -883,13 +924,13 @@ function sharePrettyLog(msg) {
 
         //check to see if objects is now an empty array
         if (msg.objects.length == 0) {
-            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`);
+            logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`);
         } else {
-            logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`) + `\n${firstObj}`,
+            logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`,
                 util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
         }
     } else {
-        logHandler(colorOf.dim(`${msg.thread}:[${msg.action}]`), 
+        logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`), 
             util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
     }
 
