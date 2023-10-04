@@ -26,7 +26,7 @@ jckConsole.startup({
 ```
 
 ### v1.4.2
-@deprecated - Replaced with the dedicated @jumpcutking/console module in v1.5.0.
+Changes were overridden by v1.5.0. See v1.5.0 for more information.
 
 ### v1.4.1
 Added options.reportStderr to the Thread Manager, which will now default to false. This prevents parroting (duplicate messages) of uncaught exceptions, console.error|warn, and other error messages. You will want to activate report errors if you're using a non-traditional process, such as something other than Node (like an AV Encoder). 
