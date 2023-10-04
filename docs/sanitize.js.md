@@ -11,6 +11,7 @@ Justin K Kazmierczak
 
 May be subject to The Universe Terms of Service.
 
+**Auther**: @jumpcutking  
 
 * [@jumpcutking/threads/src/sanitize](#module_@jumpcutking/threads/src/sanitize)
     * [~report](#module_@jumpcutking/threads/src/sanitize..report)
