@@ -10,7 +10,7 @@ Threads now supports promises through the technique known as deferred promises. 
 
 Event listeners (outside of actions) can now be added using the standard event listening function .on(type, callback); they are fired using .fire(type, message).
 
-Documentation has moved to individual files in the docs folder. You can recreate the docs using createDocs.js in the project's root. They should be located here: [https://github.com/jumpcutking/console/tree/main/docs](https://github.com/jumpcutking/console/tree/main/docs). 
+Documentation has moved to individual files in the docs folder. You can recreate the docs using createDocs.js in the project's root. They should be located here: [https://github.com/jumpcutking/threads/tree/main/docs](https://github.com/jumpcutking/threads/tree/main/docs). 
 
 Replaced src/console with @jumpcutking/console. This will allow for better control over the console and how it reports messages.
 
@@ -37,7 +37,7 @@ Added support for custom command arguments; this helps add "--trace-warnings" an
 Threads now support adding multiple events to actions (event listeners) on both the parent and child threads. This can be done naturally by adding new events to the same ID. Threads.addAction and Thread.add will return the ID of the current event to make it easy to remove that event when needed. Use the new function Threads.removeActionAt(id, index) and Thread.removeAt(id, index) to remove the event listener by its index. 
 
 ## Program Level Documentation
-You can find it in [DOCS](https://github.com/jumpcutking/console/tree/main/docs), you can recreate the docs using createDocs.js in the project's root. 
+You can find it in [DOCS](https://github.com/jumpcutking/threads/tree/main/docs), you can recreate the docs using createDocs.js in the project's root. 
 
 You can run the documentation builder using NPM Docs.
 ```
