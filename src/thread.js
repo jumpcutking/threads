@@ -221,7 +221,7 @@ function OverideConsole() {
         }
     });
 
-    console.log("Console Options", consoleOptions);
+    // console.log("Console Options", consoleOptions);
 
     // console.info("Test Info");
     // console.warn("Test Warn");

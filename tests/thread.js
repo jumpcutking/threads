@@ -83,7 +83,7 @@ thread.add("thread.startup", async (data) => {
     //close after 35 seconds
     setTimeout(() => {
         process.exit(0);
-    }, 35000);
+    }, 20000);
 
     console.log("Thread is ready.", thread.list());
 
