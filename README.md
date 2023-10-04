@@ -6,9 +6,9 @@ Originally built as part of The Universe App Tools, I've released the source to 
 ## What's New
 
 ### v1.5.0
-Threads now uses supports deffered promises through async/await using the function threads.awaitResponse();, chains haven't been fully tested but using .catch() should perform as expected.
+Threads now supports promises through the technique known as deferred promises. I've tested it using async/await using the function threads.awaitResponse();, chains haven't been fully tested but using .catch() should perform as expected.
 
-Event listerners (outside of actions) can now be added using the standard event listening function .on(type, callback); they are fired using .fire(type, message).
+Event listeners (outside of actions) can now be added using the standard event listening function .on(type, callback); they are fired using .fire(type, message).
 
 Documentation has moved to individual files in the docs folder. You can recreate the docs using createDocs.js in the project's root. They should be located here: [https://github.com/jumpcutking/console/tree/main/docs](https://github.com/jumpcutking/console/tree/main/docs). 
 
@@ -48,7 +48,7 @@ NPM run docs
 Threads was developed for use as part of The Universe. While it is offered freely in the traditional MIT license style, except that I've added a notice not to use threads to compromise or abuse The Universe. [The Universe Terms of Service https://egtuniverse.com/legal/terms](https://egtuniverse.com/legal/terms). 
 
 # Thread Manager
-The thread manager is a short module designed to enable messages to be sent or received from both the threads and the parent process (running the thread manager.) It's a unique and helpful messaging system that is easily expanded. For example, sending a message by its ID to all threads or a specific thread is simple.
+The thread manager is a short module designed to enable messages to be sent or received from both the threads and the parent process (running the thread manager.) It's a unique and helpful messaging system that can easily be expanded. For example, sending a message by its ID to all threads or a specific thread is simple.
 
 ## Install
 Use NPM to install and "--save" the module to your project's package.json file.
@@ -105,7 +105,7 @@ Check out the documentation for more information on the options object.
 You can spawn any process with the Thread Manager; however, the process will need to support the manager. It will need to receive a thread.startup action, and handle actions sent to it in the process stream. Node will be the default.
 
 ## Actions (Received Messages) - Event Listeners
-Actions work similiar to event listeners they are activated on any message sent from the thread to its children, and the children use the object of their action (per Child) to handle requests from the thread manager. Unregistered actions will report issues to the console. You'll get a warning when a message has been requested with no action attached.
+Actions work similarly to event listeners they are activated on any message sent from the thread to its children, and the children use the object of their action (per Child) to handle requests from the thread manager. Unregistered actions will report issues to the console. You'll get a warning when a message has been requested with no action attached.
 
 Actions aren't limited to promises but how they are called; they can be both async/await promises (chains are untested) and normal event-halting functions.
 
@@ -116,7 +116,7 @@ threads.addAction("parent-count", async (data) => {
 });
 ```
 
-## Start up action.
+## Startup action.
 After a thread has been spawned, it will be initialized with its thread ID. To start actions immediately after the thread has been started, use the action "thread.startup" in the child thread.
 
 ```Javascript
@@ -131,7 +131,7 @@ thread.add("thread.startup", async (data) => {
 You can add additional event listeners to an action by the same method. addAction will also return the index of the newly created event listener.
 
 ## Remove Event Listeners and Actions
-An event listener can be removed by it's known index using the Threads.removeActionAt(id, index). You can use Threads.remove(id) to remove the entire action and all associated listeners.
+An event listener can be removed by its known index using the Threads.removeActionAt(id, index). You can use Threads.remove(id) to remove the entire action and all associated listeners.
 
 ## Send a Request to all Threads
 A request is sent to all threads by default or by setting a wildcard (*) as the thread ID in the threads.send function.
@@ -165,7 +165,7 @@ console.log("The Thread Manager: ", threads.list());
 ## Requests, Actions, and Messages
 Message objects are sent to threads, and children are handled internally. However, suppose you're trying to add support for threads in your application and spawn a different process (which you can do by sending spawn.command: (command) when adding a thread) or perhaps integrate with other parts of your program. In that case, you'll need to know how messages are formatted.
 
-Message objects will always have a meta object. Each request will override this object, but received messages will not be overridden and are expected to send messages in the following format.
+Message objects will always have a meta object. Each request will override this object, but received messages will not be overridden, and messages will be expected to be sent in the following format.
 
 ```Javascript
     {
@@ -178,7 +178,7 @@ Message objects will always have a meta object. Each request will override this 
 
 An action (event) will be fired based on the id of that action.
 
-The $ variable will act as an overridden special id with the information provided by the thread manager. Avoid using this property when sending data through the thread manager or a thread.
+The $ variable will act as an overridden special ID with the information provided by the thread manager. Avoid using this property when sending data through the thread manager or a thread.
 
 ## Attach listeners
 You can now attach functions to be fired as events. They are referred to in code as listeners.
@@ -218,7 +218,7 @@ A thread can be closed by its id. The process will be asked to exit "process.kil
 The thread will report it has been closed using the action "process.exit".
 
 # Logging
-Both the Child and The Parent support the common console.log system through [@jumpcutking/console](https://github.com/jumpcutking/console). The thread will have it's console object overridden to facilitate communication between the parent and the child. 
+Both the Child and The Parent support the common console.log system through [@jumpcutking/console](https://github.com/jumpcutking/console). The thread will have its console object overridden to facilitate communication between the parent and the child. 
 
 A child thread with the option {logging: true} activated (on itself) will report console.info(), console.log(), console.warn(), and console.debug(). The console will be overridden and yet still report issues during debug mode.
 
@@ -259,7 +259,7 @@ var { thread } = require("../index.js");
 thread.init({
     verbose: false, // silence thread specific log messages
     debug: false, // activate debug mode
-    keepAlive: true, // Keep the thread alive for futher actions
+    keepAlive: true, // Keep the thread alive for further actions
     logging: true, // Activate log overide through console.log();...
     quitOnException: false // should an uncaught exception require the thread to close
 });
@@ -293,11 +293,11 @@ An example thread is included below and can also be found in tests/thread.js
 var { thread } = require("@jumpcutking/threads");
 
 //init the thread
-thread.init({
+.init({
     keepAlive: true
 });
 
-//add the action "hello world."
+//add the action "Hello world."
 //These actions don't need to be async, but it's good practice to make them async.
 thread.add("hello world", async (data) => {
 
@@ -333,10 +333,10 @@ thread.add("hello world", async (data) => {
 You can add additional events to an action by the same method. Thread.add will also return the index of the newly created event listener.
 
 ## Remove Event Listeners and Actions
-An event listener can be removed by it's known index using the Thread.removeAt(id, index). You can use Thread.remove(id) to remove the entire action and all associated listeners.
+An event listener can be removed by its known index using the Thread.removeAt(id, index). You can use Thread.remove(id) to remove the entire action and all associated listeners.
 
 ## Child Thread Request (Send a Message to the Thread Manager)
-A child can make a request to the parent thread (or rather the Thread Manager) by requesting an action to be fired by it's ID.
+A child can make a request to the parent thread (or rather the Thread Manager) by requesting an action to be fired by its ID.
 
 ```Javascript
 //send a request to the parent thread
@@ -384,7 +384,7 @@ A thread action that supports async/await should ALWAYS return a result. The thr
 
 ## Promise Rejection (exception on Async/Await)
 
-When a promise is rejected, an exception (or rejection) will be triggered. You will recieve the following rejection object. The stacktrace returned from a promise rejection IS NOT a standard string. It is an object that contains the stacktrace information parsed by [@jumpcutking/console~parseStackTrace()](https://github.com/jumpcutking/console/blob/main/docs/index.js.md#module_@jumpcutking/console..parseStackTrace).
+When a promise is rejected, an exception (or rejection) will be triggered. You will receive the following rejection object. The stack trace returned from a promise rejection IS NOT a standard string. It is an object that contains the stack trace information parsed by [@jumpcutking/console~parseStackTrace()](https://github.com/jumpcutking/console/blob/main/docs/index.js.md#module_@jumpcutking/console..parseStackTrace).
 
 It should be noted that in rare instances the stack trace may be a string.
 
@@ -482,11 +482,11 @@ var reject = {
 }
 ```
 
-## Uncaught Promise and other Exceptions
+## Uncaught Promise and Other Exceptions
 
 In the event an exception occurs that can not be caught (as some promises tend to do), the thread manager will report the exception to the console. It will not through an error. You can use the GetLastException() function to retrieve the last uncaught exception that was thrown.
 
-## A Deffered Promise Becomes Detached
+## A Deferred Promise Becomes Detached
 
 When an action "times out" it only resolves the promise of the action in the thread manager side. The action in the thread will continue to run. This is to prevent the thread from being locked up by a promise that never resolves.
 
