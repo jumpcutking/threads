@@ -7,6 +7,8 @@
  * Justin K Kazmierczak
  * 
  * May be subject to The Universe Terms of Service.
+ * 
+ * @module @jumpcutking/threads/src/spzArray
  **/
 
 //My personal log.

@@ -7,7 +7,10 @@
  * Justin K Kazmierczak
  * 
  * May be subject to The Universe Terms of Service.
- **/
+ * 
+ * @module @jumpcutking/threads/src/sanitize
+ * @auther @jumpcutking
+ */
 
 /**
  * Whether to report errors.

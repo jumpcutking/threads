@@ -1,0 +1,11 @@
+{
+"intro": "",
+"docusaurus": false,
+"outboundPrefix": "./",
+"folders": [
+    {
+        "inbound": "./src",
+        "outbound": "docs",
+        "name": "@jumpcutking/console"
+    }
+]}

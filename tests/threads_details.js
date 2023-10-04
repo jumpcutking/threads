@@ -18,6 +18,7 @@ threads.init(`${id}.threads`, {
 //You could attach this to various other potions of your code.
 
 /*
+
 async function ListenForRequests(message) {
   //I've received a message from the thread manager.
   console.log("From Test: Listener Got a Request", message);
@@ -34,6 +35,11 @@ threads.addRequestsListener(ListenForRequests);
 
 //Received messages are sent from the children to the thread manager
 threads.addReceivedListener(ListenForMessages);
+
+threads.on("received", (message) => {
+  console.log("***From Test: Listener Got a Message (children)", message);
+});
+
 */
 
 // Another way you could write this.
