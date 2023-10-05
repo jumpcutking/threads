@@ -5,6 +5,9 @@ Originally built as part of The Universe App Tools, I've released the source to 
 
 ## What's New
 
+### v1.5.1
+Fixed a bug where non-object data or array data would be passed to the thread manager without the global $ property. This causes the message to be rejected by the thread manager. Now, non-object and array data will be wrapped in an object with the data property (message.data).
+
 ### v1.5.0
 Threads now supports promises through the technique known as deferred promises. I've tested it using async/await using the function threads.awaitResponse();, chains haven't been fully tested but using .catch() should perform as expected.
 

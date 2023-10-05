@@ -1,5 +1,5 @@
 /**
- * Thread Manager for children processes
+ * Thread module for the child process.
  * 
  * This component may not be reversed engineered for hacking or abuse
  * of The EGT Universe, The Universe, or third-party apps.
@@ -429,6 +429,7 @@ async function handleMessage(message) {
 
 /**
  * Request a message from the parent process.
+ * Any non-object or array will be wrapped in a data property. Message.data
  * @param {string} id The id of the action to request.
  * @param {*} message The data to send to the parent process. Will defualt to an empty object.
  */
@@ -439,6 +440,20 @@ function request(id, message = {}) {
         message = {};
     }
 
+    //if it's an array, wrap it in a data property.
+    if (Array.isArray(message)) {
+        message = {
+            data: message
+        };
+    
+        //if message is not an object, wrap it in a data property.
+    
+    } else if (typeof message !== "object") {
+        message = {
+            data: message
+        };
+    }
+   
     //ensure all properties of the message are now detatched using Object.GetOwnPropertyNames
     // message = JSON.parse(JSON.stringify(message, Object.getOwnPropertyNames(message)));
   
