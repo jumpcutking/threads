@@ -2,7 +2,7 @@
 <a name="module_@jumpcutking/threads/src/thread"></a>
 
 ## @jumpcutking/threads/src/thread
-Thread Manager for children processes
+Thread module for the child process.
 
 This component may not be reversed engineered for hacking or abuse
 of The EGT Universe, The Universe, or third-party apps.
@@ -135,6 +135,7 @@ Handles a message object from the Thread Manager.
 
 ### @jumpcutking/threads/src/thread~request(id, message)
 Request a message from the parent process.
+Any non-object or array will be wrapped in a data property. Message.data
 
 **Kind**: inner method of [<code>@jumpcutking/threads/src/thread</code>](#module_@jumpcutking/threads/src/thread)  
 
