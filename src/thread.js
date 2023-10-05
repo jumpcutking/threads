@@ -155,7 +155,19 @@ function init(_options = {}) {
     if (options.logging) {
         log_verbose("init", "Logging is enabled.", null);
 
-        OverideConsole();
+        if (!(options.debug)) {
+            OverideConsole();
+        } else {
+
+            jckConsole.startup({
+                reportToConsole: true,
+                generateStacktrace: false,
+                storeLogs: false
+            });
+
+            console.log("Debug mode is activated so the orveriding console will be limited to prevent a RangeError of Maximum call stack size exceeded.");
+
+        }
 
     }
 
@@ -179,7 +191,25 @@ function init(_options = {}) {
         // console.error('Asynchronous error caught.', err);
     });
 
+
+    if (options.debug) {
+        DebugStartUp();
+    }
+
 }  module.exports.init = init;
+
+async function DebugStartUp() {
+
+    var jsonMessage = {
+        "$": {
+            "id": "thread.startup",
+            "threadId": "test.thread.123"
+        }
+    };
+
+    handleMessage(JSON.stringify(jsonMessage));
+
+}
 
 var OverideConsoleOptions = {
     hasRun: false,
@@ -418,7 +448,21 @@ async function handleMessage(message) {
             message.$.promise.reject(error);
         }
 
-        log_verbose("onData.error", `Thread: ${options.id} Could not parse JSON.`, {
+        // log_verbose("onData.error", `Thread: ${options.id} ${error.message}.`, {
+        //     error: error,
+        //     message: message
+        // });
+
+        var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
+        error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        error.stack = stacktrace;
+
+        console.warn(`${error.message} [on thread ${options.id}]`, {
+            error: error,
+            message: message
+        });
+
+        log_verbose("onData.error", `Thread: ${options.id} ${error.message}.`, {
             error: error,
             message: message
         });
