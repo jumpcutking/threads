@@ -9,7 +9,7 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 ## What's New
 
 ### v1.5.2
-Futher fixes in error handling.
+Further fixes in error handling.
 
 ### v1.5.1
 Fixed a bug where non-object data or array data would be passed to the thread manager without the global $ property. This causes the message to be rejected by the thread manager. Now, non-object and array data will be wrapped in an object with the data property (message.data).
