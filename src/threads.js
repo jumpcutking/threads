@@ -154,7 +154,7 @@ function init(id = "threads", _options = {}) {
     addAction("thread.ready", async (data) => {
         SimpleLog("Thread is ready.", data);
 
-        console.log("Thread is ready.", data);
+        // console.log("Thread is ready.", data);
 
         //using data.$.threadId, get the thread object
         var thread = my.threads.search(data.$.threadId).items[0];
@@ -1393,15 +1393,31 @@ function sharePrettyLog(msg) {
 
         //Util.inspect produces a string not an object, so we append it at such.
 
-        //check to see if objects is now an empty array
-        if (msg.objects.length == 0) {
-            logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`);
+        //check to see if the remaining object is an array
+        if (Array.isArray(msg.objects)) {
+            //check to see if objects is now an empty array
+            if (msg.objects.length == 0) {
+                logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`);
+            } else {
+                //insert a tab
+                // var tab = "\t";
+                logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj} `
+                + colorOf.white(util.inspect(msg.objects, {showHidden: false, depth: null, colors: true})));
+            }
         } else {
-            //insert a tab
-            // var tab = "\t";
             logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj} `
             + colorOf.white(util.inspect(msg.objects, {showHidden: false, depth: null, colors: true})));
         }
+
+        // //check to see if objects is now an empty array
+        // if (msg.objects.length == 0) {
+        //     logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj}`);
+        // } else {
+        //     //insert a tab
+        //     // var tab = "\t";
+        //     logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ` ${firstObj} `
+        //     + colorOf.white(util.inspect(msg.objects, {showHidden: false, depth: null, colors: true})));
+        // }
 
     } else {
         logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ' '
