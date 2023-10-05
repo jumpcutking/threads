@@ -3,6 +3,9 @@ Threads is a multiple-thread management tool supporting async/await promises or 
 
 Originally built as part of The Universe App Tools, I've released the source to help the community solve the node threading problem: supporting Node.JS function with multiple process threads and communicating between all processes.
 
+## Known Bugs
+Multiple "uncaught" messages may be reported to the console when an uncaught exception occurs. This bug also affects multi-level threading processes where more than one thread manager is in play (such as building Universe App Tools from the local webserver). 
+
 ## What's New
 
 ### v1.5.1
