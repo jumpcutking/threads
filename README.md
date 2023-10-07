@@ -8,6 +8,9 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 
 ## What's New
 
+### v1.5.3
+Fixed an issue with threads.kill(); not working properly.
+
 ### v1.5.2
 Further fixes in error handling.
 

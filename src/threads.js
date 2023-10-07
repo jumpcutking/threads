@@ -1461,8 +1461,8 @@ function close(id) {
 function kill(id) {
     var thread = my.threads.search(id);
     if (thread) {
-        console.log(`Closing thread ${id}`)
-        thread.process.kill(1);
+        console.log(`Closing thread ${id}.`);
+        thread.items[0].process.kill(1);
     } else { 
         throw new Error(`Thread ${id} not found.`);
     }
