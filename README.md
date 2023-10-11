@@ -8,6 +8,9 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 
 ## What's New
 
+### v1.5.5
+All "error" objects have their object properties presented to the thread manager.
+
 ### v1.5.3
 Fixed an issue with threads.kill(); not working properly.
 

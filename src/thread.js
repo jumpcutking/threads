@@ -27,6 +27,8 @@ var jckConsole = require("@jumpcutking/console");
  * keepAlive: the thread will stay active awaiting further requests until closed.
  * logging: if true, the thread will log messages to the thread manager. It will also overide console.
  * quitOnException: if true, the thread will quit when an exception is thrown.
+ * console: the jckConsole options. @see {@link module:@jumpcutking/console~startup} for details.
+ * santizeStacktrace: if true, the stack trace will be santized to remove the path of the thread. Safe for displaying to the user. Replaces Process.cwd() with ~, usually producing "~/script.js".
  */
 var options = {
     id: "threads.thread",
@@ -36,7 +38,8 @@ var options = {
     keepAlive: true,
     logging: false,
     quitOnException: true, 
-    console: {}
+    console: {},
+    santizeStacktrace: false
 }
 
 /**
@@ -471,6 +474,8 @@ async function handleMessage(message) {
 
 } module.exports.handleMessage = handleMessage;
 
+var procPath = process.cwd();
+
 /**
  * Request a message from the parent process.
  * Any non-object or array will be wrapped in a data property. Message.data
@@ -498,6 +503,37 @@ function request(id, message = {}) {
         };
     }
    
+    //recursively search for any objects that are type error and convert them to strings.
+    message = JSON.parse(JSON.stringify(message, function (key, value) {
+        if (value instanceof Error) {
+            var stack = jckConsole.parseStackTrace(value.stack);
+            var error = {};
+            Object.getOwnPropertyNames(value).forEach(function (key) {
+                error[key] = value[key];
+            });
+
+            // error.cwd = procPath;
+            //santize the stack trace
+
+            if (options.santizeStacktrace) {
+                for (var i = 0; i < stack.length; i++) {
+                    try {
+                        if ("file" in stack[i]) {
+                            stack[i].file = stack[i].file.replace(procPath, "~");
+                        }
+                    } catch (error) {
+                        
+                    }
+
+                }
+            }
+
+            error.stack = stack;
+            return error;
+        }
+        return value;
+    }));
+
     //ensure all properties of the message are now detatched using Object.GetOwnPropertyNames
     // message = JSON.parse(JSON.stringify(message, Object.getOwnPropertyNames(message)));
   
