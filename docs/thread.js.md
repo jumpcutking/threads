@@ -21,6 +21,7 @@ May be subject to The Universe Terms of Service.
     * [~Startup(data)](#module_@jumpcutking/threads/src/thread..Startup)
     * [~Close()](#module_@jumpcutking/threads/src/thread..Close)
     * [~handleMessage(message)](#module_@jumpcutking/threads/src/thread..handleMessage) ⇒ <code>object</code>
+    * [~generateSafeError(err)](#module_@jumpcutking/threads/src/thread..generateSafeError)
     * [~request(id, message)](#module_@jumpcutking/threads/src/thread..request)
     * [~addAction(id, handler)](#module_@jumpcutking/threads/src/thread..addAction)
     * [~log(action, message, objects)](#module_@jumpcutking/threads/src/thread..log)
@@ -130,6 +131,17 @@ Handles a message object from the Thread Manager.
 | reject.$.threadId | <code>object</code> | The id of the thread that rejected the promise. |
 | reject.stack | <code>object</code> | The stack trace of the error. (if an error object was passed in) Uses module: @jumpcutking/console~stacktrace object. |
 | reject.message | <code>object</code> | The message of the error. (if an error object was passed in) |
+
+<a name="module_@jumpcutking/threads/src/thread..generateSafeError"></a>
+
+### @jumpcutking/threads/src/thread~generateSafeError(err)
+Generates a safe and passable error message
+
+**Kind**: inner method of [<code>@jumpcutking/threads/src/thread</code>](#module_@jumpcutking/threads/src/thread)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>\*</code> | The error to generate a safe error message for. |
 
 <a name="module_@jumpcutking/threads/src/thread..request"></a>
 

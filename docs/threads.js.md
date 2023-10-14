@@ -35,6 +35,7 @@ May be subject to The Universe Terms of Service.
         * [~addAction(id, handler)](#module_@jumpcutking/threads/src/threads..addAction) ⇒ <code>Boolean</code>
         * [~removeActionAt(id, index)](#module_@jumpcutking/threads/src/threads..removeActionAt)
         * [~list()](#module_@jumpcutking/threads/src/threads..list) ⇒ <code>Object</code>
+        * [~generateSafeError(err)](#module_@jumpcutking/threads/src/threads..generateSafeError)
         * [~AsyncRequest(actionID, message, threadID, timeout)](#module_@jumpcutking/threads/src/threads..AsyncRequest) ⇒ <code>Promise</code> \| <code>object</code>
         * [~Send(actionID, message, threadID, shallThrow)](#module_@jumpcutking/threads/src/threads..Send)
         * ~~[~SendMessageToRequestListeners(message)](#module_@jumpcutking/threads/src/threads..SendMessageToRequestListeners)~~
@@ -296,6 +297,17 @@ List all the threads and listerners.
 
 **Kind**: inner method of [<code>@jumpcutking/threads/src/threads</code>](#module_@jumpcutking/threads/src/threads)  
 **Returns**: <code>Object</code> - {threads: [], listerners: []}  
+<a name="module_@jumpcutking/threads/src/threads..generateSafeError"></a>
+
+### @jumpcutking/threads/src/threads~generateSafeError(err)
+Generates a safe and passable error message
+
+**Kind**: inner method of [<code>@jumpcutking/threads/src/threads</code>](#module_@jumpcutking/threads/src/threads)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>\*</code> | The error to generate a safe error message for. |
+
 <a name="module_@jumpcutking/threads/src/threads..AsyncRequest"></a>
 
 ### @jumpcutking/threads/src/threads~AsyncRequest(actionID, message, threadID, timeout) ⇒ <code>Promise</code> \| <code>object</code>

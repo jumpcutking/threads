@@ -36,9 +36,6 @@
     "url": "https://github.com/jumpcutking/threads/issues"
   },
   "homepage": "https://github.com/jumpcutking/threads#readme",
-  "devDependencies": {
-    "jsdoc-to-markdown": "^8.0.0"
-  },
   "dependencies": {
     "@jumpcutking/console": "^0.8.1",
     "colors": "^1.4.0"

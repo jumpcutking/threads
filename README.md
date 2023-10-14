@@ -9,7 +9,7 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 ## What's New
 
 ### v1.5.5
-All "error" objects have their object properties presented to the thread manager.
+This is a breaking changes update. Threads has been updated to rely more and more on jckConsole.parseStackTrace(). If you detect and treat errors like "error" objects, you'll find the .stack() is now an array of stack objects. All "error" objects have their object properties presented to the thread manager. See more here: [@jumpcutking/console](https://github.com/jumpcutking/console).
 
 ### v1.5.3
 Fixed an issue with threads.kill(); not working properly.

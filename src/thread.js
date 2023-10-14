@@ -27,8 +27,6 @@ var jckConsole = require("@jumpcutking/console");
  * keepAlive: the thread will stay active awaiting further requests until closed.
  * logging: if true, the thread will log messages to the thread manager. It will also overide console.
  * quitOnException: if true, the thread will quit when an exception is thrown.
- * console: the jckConsole options. @see {@link module:@jumpcutking/console~startup} for details.
- * santizeStacktrace: if true, the stack trace will be santized to remove the path of the thread. Safe for displaying to the user. Replaces Process.cwd() with ~, usually producing "~/script.js".
  */
 var options = {
     id: "threads.thread",
@@ -38,8 +36,7 @@ var options = {
     keepAlive: true,
     logging: false,
     quitOnException: true, 
-    console: {},
-    santizeStacktrace: false
+    console: {}
 }
 
 /**
@@ -181,11 +178,27 @@ function init(_options = {}) {
 
         //Do I have a promise awaiting resolve?
 
+        // console.warn("Uncaught Exception", err, typeof err, err instanceof Error);
+
+
+
+        //is the err an error?
+        if (err instanceof Error) {
+            var stacktrace = jckConsole.parseStackTrace(err.stack, 1);
+            err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+            err.stack = stacktrace;
+        } else if (typeof err === "string") {
+            err = {
+                message: err,
+                stack: jckConsole.GenerateStacktrace(),
+                uncaughtException: true
+            }
+        }
+
 
         //convert error to json
-        err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
 
-        log("process.uncaught", "An uncaught exception occurred.", err);
+        log("process.uncaught", `Thread: ${options.id} An uncaught exception occurred.`, err);
 
         if (options.quitOnException) {
             process.exit(2);
@@ -460,21 +473,42 @@ async function handleMessage(message) {
         error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
         error.stack = stacktrace;
 
-        console.warn(`${error.message} [on thread ${options.id}]`, {
-            error: error,
-            message: message
-        });
+        // console.error(`${error.message} [on thread ${options.id}]`, {
+        //     error: error,
+        //     message: message
+        // });
 
         log_verbose("onData.error", `Thread: ${options.id} ${error.message}.`, {
             error: error,
             message: message
         });
 
+        log("process.uncaught", `Thread: ${options.id} ${error.message}.`, error);
+
     }
 
 } module.exports.handleMessage = handleMessage;
 
-var procPath = process.cwd();
+/**
+ * Generates a safe and passable error message
+ * @param {*} err The error to generate a safe error message for.
+ */
+function generateSafeError(err) {
+
+    //if err is undefined, return undefined
+    if (typeof err == "undefined") {
+        console.error("Threads is unable to generate a safe error. Error is undefined.");
+    }
+
+    if (typeof err == "string") {
+        return err;
+    }
+
+    var safeError = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    safeError.stack = jckConsole.parseStackTrace(safeError.stack, 0);
+    return safeError;
+
+} module.exports.generateSafeError = generateSafeError;
 
 /**
  * Request a message from the parent process.
@@ -503,37 +537,6 @@ function request(id, message = {}) {
         };
     }
    
-    //recursively search for any objects that are type error and convert them to strings.
-    message = JSON.parse(JSON.stringify(message, function (key, value) {
-        if (value instanceof Error) {
-            var stack = jckConsole.parseStackTrace(value.stack);
-            var error = {};
-            Object.getOwnPropertyNames(value).forEach(function (key) {
-                error[key] = value[key];
-            });
-
-            // error.cwd = procPath;
-            //santize the stack trace
-
-            if (options.santizeStacktrace) {
-                for (var i = 0; i < stack.length; i++) {
-                    try {
-                        if ("file" in stack[i]) {
-                            stack[i].file = stack[i].file.replace(procPath, "~");
-                        }
-                    } catch (error) {
-                        
-                    }
-
-                }
-            }
-
-            error.stack = stack;
-            return error;
-        }
-        return value;
-    }));
-
     //ensure all properties of the message are now detatched using Object.GetOwnPropertyNames
     // message = JSON.parse(JSON.stringify(message, Object.getOwnPropertyNames(message)));
   

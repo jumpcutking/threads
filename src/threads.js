@@ -21,11 +21,21 @@ var { spawn } = require('child_process');
  * Using util to deep dive into objects.
  */
 var util = require('util');
+var fs = require('fs');
+var path = require('path');
 
 /**
  * To facilitate logging stacktraces.
  */
 var jckConsole = require("@jumpcutking/console");
+
+// /**
+//  * To prevent recursion, use this to not report console messages through jckConsole.
+//  * THIS should be development only.
+//  */
+// var Console = require("node:console").Console;
+// var noneRecursiveConsole = new Console(process.stdout, process.stderr);
+// noneRecursiveConsole.info("***** Using noneRecursiveConsole to prevent recursion.");
 
 /**
  * Using colors to colorize console output.
@@ -330,6 +340,20 @@ function add(id, local, options = {}) {
             commandArgs: commandArgs
         });
 
+        //check if the file exists - if it's a node thread
+        if (spawnOptions.command == "node") {
+
+            //check if the first argument is a relative path
+            if (commandArgs[0].substr(0, 1) == ".") {
+                //check if the first argument actually exists
+                var fileToTest = path.join(process.cwd(), commandArgs[0]);
+                if (!(fs.existsSync(fileToTest))) {
+                    throw new Error(`Threads: Unable to spawn a node thread. The file: ${fileToTest} does not exist.`);
+                }
+            }
+
+        }
+
         thread.process = spawn(spawnOptions.command, commandArgs);
 
         // set the encoding of the stdout stream to 'utf8'
@@ -530,8 +554,8 @@ function add(id, local, options = {}) {
             objects: {
                 id: id,
                 local: local,
-                options: options,
-                error: error
+                options: {...options},
+                error: generateSafeError(error)
             }
         });
 
@@ -585,6 +609,28 @@ function list() {
         actions: my.actions.list(),
     }
 } module.exports.list = list;
+
+
+/**
+ * Generates a safe and passable error message
+ * @param {*} err The error to generate a safe error message for.
+ */
+function generateSafeError(err) {
+
+    //if err is undefined, return undefined
+    if (typeof err == "undefined") {
+        console.error("Threads is unable to generate a safe error. Error is undefined.");
+    }
+
+    if (typeof err == "string") {
+        return err;
+    }
+
+    var safeError = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    safeError.stack = jckConsole.parseStackTrace(safeError.stack, 0);
+    return safeError;
+
+} module.exports.generateSafeError = generateSafeError;
 
 var myDefferedPromises = []
 
@@ -1238,7 +1284,7 @@ function detialsOfThread(thread) {
  */
 function receivedLog(message) {
 
-    // console.log("receivedLog", message);
+    // noneRecursiveConsole.log("receivedLog", message);
 
     if (typeof message !== "object") {
         console.error("receivedLog: Message is not an object.", message);
@@ -1285,6 +1331,8 @@ function receivedLog(message) {
     // console.log(message);
     if (message.action == "process.uncaught") {
 
+        // noneRecursiveConsole.warn("Proc: Uncaught Exception", message);
+
         fire("uncaught", message);
 
         var nObject = {...message.objects};
@@ -1293,31 +1341,64 @@ function receivedLog(message) {
         delete nObject.message;
 
         if (Object.keys(nObject).length == 0) {
-            sharePrettyLog({
-                $: message.$,
-                // thread: message["$"].threadId,
-                action: "Console",
-                message: "error",
-                objects: [`${message.message} Thread: ${message.$.threadId}.
-    ${message.objects.stack}`]
-            });
-            return;
+
+            //is message.objects.stack a object
+            if (typeof message.objects.stack == "object") {
+
+                sharePrettyLog({
+                    $: message.$,
+                    // thread: message["$"].threadId,
+                    action: "Console",
+                    message: "error",
+                    objects: [`${message.message} Thread: ${message.$.threadId}.`, message.objects]
+                });
+                return;
+
+            } else {
+
+                sharePrettyLog({
+                    $: message.$,
+                    // thread: message["$"].threadId,
+                    action: "Console",
+                    message: "error",
+                    objects: [`${message.message} Thread: ${message.$.threadId}.
+        ${message.objects.stack}`]
+                });
+                return;
+
+            }
 
         } else {
 
             // if (nObject.error == message.objects.stack) {
             //     delete nObject.error;
             // }
+           
+            if (typeof message.objects.stack == "object") {
 
-            sharePrettyLog({
-                $: message.$,
-                // thread: message["$"].threadId,
-                action: "Console",
-                message: "error",
-                objects: [`${message.message} Thread: ${message.$.threadId}.
-    ${message.objects.stack}`, nObject]
-            });
-            return;
+                sharePrettyLog({
+                    $: message.$,
+                    // thread: message["$"].threadId,
+                    action: "Console",
+                    message: "error",
+                    objects: [`${message.message} Thread: ${message.$.threadId}.`, message.objects]
+                });
+                return;
+
+            } else {
+
+                sharePrettyLog({
+                    $: message.$,
+                    // thread: message["$"].threadId,
+                    action: "Console",
+                    message: "error",
+                    objects: [`${message.message} Thread: ${message.$.threadId}.
+        ${message.objects.stack}`]
+                });
+                return;
+
+            }
+
         }
         // return;
    }
@@ -1483,11 +1564,28 @@ function GetLastUncaughtException() {
 }; module.exports.getLastUncaughtException = GetLastUncaughtException;
 
 //handle all uncaught errors
+/**
+ * Handles all uncaught errors.
+ * @param {*} error The error that was thrown.
+ */
 process.on('uncaughtException', (error) => {
 
     lastUncaughtException = error;
 
-    // console.warn(error);
+    // console.error("Manager: Uncaught Exception", error);
+
+    // console.warn("Manager: Uncaught Exception", error, typeof error, error instanceof Error);
+
+    //is the err an error?
+    if (error instanceof Error) {
+        error = generateSafeError(error);
+    } else if (typeof error === "string") {
+        error = {
+            message: error,
+            stack: jckConsole.GenerateStacktrace(),
+            uncaughtException: true
+        }
+    }
 
     //Do I have any promises that are unresolved?
     if (myDefferedPromises.length > 0) {
@@ -1497,9 +1595,10 @@ process.on('uncaughtException', (error) => {
                 $: {
                     id: "promise.reject"
                 },
-                error: error,
+                error: err,
                 message: error.message,
                 stack: error.stack
+                // stack: error.stack
             });
         });
     }
@@ -1507,10 +1606,10 @@ process.on('uncaughtException', (error) => {
     receivedLog({
         thread: "main",
         action: `process.uncaught`,
-        message: `An uncaught error has occured.`,
+        message: `Manager: An uncaught error has occured.`,
         objects: {
             error: error,
-            stack: error.stack
+            stack: error.stack,
         }
     });
 });
