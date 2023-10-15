@@ -9,7 +9,7 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 ## What's New
 
 ### v1.5.7
-Using the option reportStderr: true will now report process errors using the jckConsole stack trace. Remember any stack trace that is a string and not an object is textual infomtion. Becuase stderr is a inconsistant stream, you may get a string instead of an object in the stack trace array. See more here: [@jumpcutking/console~GenerateStacktrace(stacktrace, _levelToRemove)](https://github.com/jumpcutking/console/blob/main/docs/index.js.md#jumpcutkingconsolegeneratestacktracestacktrace-_leveltoremove--object).
+Using the option reportStderr: true will now report process errors using the jckConsole stack trace. Remember, any stack trace that is a string, not an object, is textual information. Because stderr is an inconsistent stream, you may get a string instead of an object in the stack trace array. See more here: [@jumpcutking/console~GenerateStacktrace(stacktrace, _levelToRemove)](https://github.com/jumpcutking/console/blob/main/docs/index.js.md#jumpcutkingconsolegeneratestacktracestacktrace-_leveltoremove--object).
 
 ### v1.5.5
 This is a breaking changes update. Threads has been updated to rely more and more on jckConsole.parseStackTrace(). If you detect and treat errors like "error" objects, you'll find the .stack() is now an array of stack objects. All "error" objects have their object properties presented to the thread manager. See more here: [@jumpcutking/console](https://github.com/jumpcutking/console).
