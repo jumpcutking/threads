@@ -307,7 +307,7 @@ function add(id, local, options = {}) {
             }
             
             commandArgs = [...options.spawn.args];
-            commandArgs.unshift(local);
+            commandArgs.push(local);
 
         }
     }
@@ -437,15 +437,34 @@ function add(id, local, options = {}) {
             //TO DO: Check if I need to buffer error data as well?
             data = `${data}`;
 
+            var errorObj = {};
+            
+            try {
+                errorObj = ProcessStderr(data);
+            } catch (error) {
+                console.warn(`${thread.id} stderr error could not be processed.`, {
+                    error: error,
+                    orginal: data
+                });
+
+                errorObj = data;
+            }
+
+
+            // console.warn(`${thread.id} stderr`, {
+            //     // data: data,
+            //     errorObject: errorObj,
+            //     options: options,
+            //     reportStderr: options.reportStderr
+            // });
+
             if (options.reportStderr) {
 
                 receivedLog({
                     thread: thread.id,
                     action: `process.stderr`,
                     message: `Error in thread: ${id}`,
-                    objects: {
-                        message: data
-                    }
+                    objects: errorObj
                 });
 
             }
@@ -527,7 +546,7 @@ function add(id, local, options = {}) {
         try {
 
             //add the thread to the thread manager
-            my.threads.add(thread, )
+            my.threads.add(thread);
             
         } catch (error) {
 
@@ -566,6 +585,13 @@ function add(id, local, options = {}) {
 
 } module.exports.addThread = add;
 module.exports.add = add;
+
+
+function ProcessStderr(data) {
+
+    // console.info
+   return jckConsole.parseStackTrace(data);
+}
 
 /**
  * Adds an action to the thread manager.
