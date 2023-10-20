@@ -210,6 +210,8 @@ You can now attach functions to be fired as events. They are referred to in code
 
 Identical to how actions are attached, you can create a portion of your code to listen to all events requested (send to children) by adding a requests listener (addRequestsListener). You can do the same thing with received requests (from the children) (addReceivedListener).
 
+** Don't use the quitOnException thread option on threads with promises; otherwise, your promise will not resolve when an exception occurs because the thread has closed. **
+
 ```Javascript
 sync function ListenForRequests(message) {
     //I've received a message from the thread manager.
