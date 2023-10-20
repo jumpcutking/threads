@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/jumpcutking/threads#readme",
   "dependencies": {
-    "@jumpcutking/console": "^0.8.1",
+    "@jumpcutking/console": "^1.2.0",
     "colors": "^1.4.0"
   }
 }
