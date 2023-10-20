@@ -26,6 +26,7 @@ May be subject to The Universe Terms of Service.
         * [~spzArr](#module_@jumpcutking/threads/src/threads..spzArr)
         * [~my](#module_@jumpcutking/threads/src/threads..my)
         * [~init(id, _options)](#module_@jumpcutking/threads/src/threads..init)
+        * [~FindThread(id)](#module_@jumpcutking/threads/src/threads..FindThread) ⇒ <code>\*</code>
         * ~~[~addRequestsListener(listener)](#module_@jumpcutking/threads/src/threads..addRequestsListener)~~
         * ~~[~addReceivedListener(listener)](#module_@jumpcutking/threads/src/threads..addReceivedListener)~~
         * [~on(type, listener)](#module_@jumpcutking/threads/src/threads..on)
@@ -152,6 +153,19 @@ Warning: This thread manager is designed for one manager per application.
 | _options.closeID | <code>string</code> | The id to close the thread. |
 | _options.logging | <code>boolean</code> | Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread. |
 | _options.reportStderr | <code>boolean</code> | Will errors from the process error channel be reported directly? Disable this to prevent duplicate error messages (exceptions, and console.warn|error will parrot to the thread manager on stderr resulting in duplicate messages). |
+| _options.showFrom | <code>boolean</code> | This will show where a console log was orignally logged from - works on threads. |
+
+<a name="module_@jumpcutking/threads/src/threads..FindThread"></a>
+
+### @jumpcutking/threads/src/threads~FindThread(id) ⇒ <code>\*</code>
+Finds a thread by its id.
+
+**Kind**: inner method of [<code>@jumpcutking/threads/src/threads</code>](#module_@jumpcutking/threads/src/threads)  
+**Returns**: <code>\*</code> - The thread object.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>\*</code> | The id of the thread to find. |
 
 <a name="module_@jumpcutking/threads/src/threads..addRequestsListener"></a>
 
@@ -312,6 +326,7 @@ Generates a safe and passable error message
 
 ### @jumpcutking/threads/src/threads~AsyncRequest(actionID, message, threadID, timeout) ⇒ <code>Promise</code> \| <code>object</code>
 Async Awaits for a promise.resolve or promise.reject from a thread.
+You can now await forever, by setting the timeout to 0. This IS NOT RECOMMENDED.
 This function MUST be called using the new async/await syntax.
 A chain will fail without .catch() if the promise is rejected.
 
@@ -328,7 +343,7 @@ A chain will fail without .catch() if the promise is rejected.
 | actionID | <code>\*</code> |  | The id of the action to be called. |
 | message | <code>\*</code> |  | The message to be sent. The message global $. Will have a .primise object added |
 | threadID | <code>\*</code> |  | The id of the thread to send the message to. If id is blank, the message will be sent to all threads. |
-| timeout | <code>\*</code> | <code>30</code> | The number of seconds to wait for a response before timing out. |
+| timeout | <code>\*</code> | <code>30</code> | The number of seconds to wait for a response before timing out. 0 will disable the timeout - await forever and ever. |
 
 **Properties**
 
@@ -345,6 +360,10 @@ A chain will fail without .catch() if the promise is rejected.
 | Promise.Reject.return.$ | <code>object</code> | The global object, a copy of the object the function will provide including a promise object. |
 | Promise.Resolve.return | <code>object</code> | Typically the promise, when resolved, will return the data requested. |
 | Promise.Resolve.return.$ | <code>object</code> | The global object, a copy of the object the function will provide including a promise object. |
+| Promise.Resolve.return.$.on | <code>object</code> | The timestamp information of the thread promise |
+| Promise.Resolve.return.$.on.started | <code>number</code> | The timestamp of when the promise was started. |
+| Promise.Resolve.return.$.on.ended | <code>number</code> | The timestamp of when the promise was ended. |
+| Promise.Resolve.return.$.on.elapsed | <code>number</code> | The number of milliseconds the promise took to complete. |
 | $.id | <code>object</code> | The id of the action. promise.resolve or promise.reject |
 | $.promise | <code>object</code> | The promise object. |
 | $.promise.id | <code>object</code> | The id of the promise. |

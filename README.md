@@ -8,6 +8,13 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 
 ## What's New
 
+### v1.6.0
+Threads now report where a log entry was created in your script and share that information with the console. This update relies on a breaking change to jckConsole callbacks, adding the parameter "from" to several components. 
+
+Threads now delete their entries after the manager closes or kills them.
+
+This update also includes many bug fixes and changes to help improve Thread's performance.
+
 ### v1.5.7
 Using the option reportStderr: true will now report process errors using the jckConsole stack trace. Remember, any stack trace that is a string, not an object, is textual information. Because stderr is an inconsistent stream, you may get a string instead of an object in the stack trace array. See more here: [@jumpcutking/console~GenerateStacktrace(stacktrace, _levelToRemove)](https://github.com/jumpcutking/console/blob/main/docs/index.js.md#jumpcutkingconsolegeneratestacktracestacktrace-_leveltoremove--object).
 

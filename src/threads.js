@@ -60,7 +60,8 @@ var options = {
     verbose: false,
     logging: true,
     reportStderr: false,
-    closeID: "thread.close"
+    closeID: "thread.close",
+    showFrom: true
 }
 // module.exports.options = options;
 
@@ -111,6 +112,7 @@ module.exports.actions = my.actions;
  * @property {string} _options.closeID The id to close the thread.
  * @property {boolean} _options.logging Whether to output any logs from console.log from the child thread. Logging must be enabled at the child thread.
  * @property {boolean} _options.reportStderr Will errors from the process error channel be reported directly? Disable this to prevent duplicate error messages (exceptions, and console.warn|error will parrot to the thread manager on stderr resulting in duplicate messages).
+ * @property {boolean} _options.showFrom This will show where a console log was orignally logged from - works on threads.
  * @throws {Error} If the thread manager has already been initialized. 
  */
 function init(id = "threads", _options = {}) {
@@ -132,6 +134,10 @@ function init(id = "threads", _options = {}) {
 
     if ("reportStderr" in _options) {
         options.reportStderr = _options.reportStderr;
+    }
+
+    if ("showFrom" in _options) {
+        options.showFrom = _options.showFrom;
     }
 
     if (!options.reportStderr) {
@@ -167,7 +173,18 @@ function init(id = "threads", _options = {}) {
         // console.log("Thread is ready.", data);
 
         //using data.$.threadId, get the thread object
-        var thread = my.threads.search(data.$.threadId).items[0];
+        var thread = null;
+        try {
+          thread = my.threads.search(data.$.threadId).items[0];
+        } catch (error) {
+            //the thread has died... why?
+            console.error("thread.ready - Thread has been disconnected from the manager.", {
+                error: generateSafeError(error),
+                message: data,
+            });
+            return false;
+        }
+
         
         if (!thread) {
             throw new Error(`Thread: ${data.$.threadId} requested it was ready but is no longer attached to the manager.`);
@@ -187,7 +204,7 @@ function init(id = "threads", _options = {}) {
                     action: `onStartup.error`,
                     message: `Error in onStartup handler for thread: ${thread.id}`,
                     objects: {
-                        error: error
+                        error: generateSafeError(error)
                     }
                 });
 
@@ -200,6 +217,15 @@ function init(id = "threads", _options = {}) {
 
 
 } module.exports.init = init;
+
+/**
+ * Finds a thread by its id.
+ * @param {*} id The id of the thread to find.
+ * @returns {*} The thread object.
+ */
+function FindThread(id) {
+    return my.threads.search(id);
+} module.exports.FindThread = FindThread;
 
 /**
  * Adds a listener to the thread manager, which will listen to all event requests sent by the thread manager.
@@ -381,7 +407,7 @@ function add(id, local, options = {}) {
                     action: `process.exit.error`,
                     message: `Error in onExit handler for thread: ${thread.id}`,
                     objects: {
-                        error: error
+                        error: generateSafeError(error)
                     }
                 });
                 
@@ -443,7 +469,7 @@ function add(id, local, options = {}) {
                 errorObj = ProcessStderr(data);
             } catch (error) {
                 console.warn(`${thread.id} stderr error could not be processed.`, {
-                    error: error,
+                    error: generateSafeError(error),
                     orginal: data
                 });
 
@@ -479,7 +505,7 @@ function add(id, local, options = {}) {
                     action: `onError.error`,
                     message: `Error in onError handler for thread: ${id}`,
                     objects: {
-                        error: error
+                        error: generateSafeError(error)
                     }
                 });
             }
@@ -512,7 +538,7 @@ function add(id, local, options = {}) {
                         action: `onSend.error`,
                         message: `Error sending message to thread: ${thread.id}`,
                         objects: {
-                            error: error,
+                            error: generateSafeError(error),
                             data: data
                         },
                     });
@@ -555,7 +581,7 @@ function add(id, local, options = {}) {
                 action: `process.creation.failed`,
                 message: `Thread: ${thread.id} not running. Message failed.`,
                 objects: {
-                    error: error
+                    error: generateSafeError(error)
                 }
             });
 
@@ -662,12 +688,13 @@ var myDefferedPromises = []
 
 /**
  * Async Awaits for a promise.resolve or promise.reject from a thread.
+ * You can now await forever, by setting the timeout to 0. This IS NOT RECOMMENDED.
  * This function MUST be called using the new async/await syntax.
  * A chain will fail without .catch() if the promise is rejected.
  * @param {*} actionID The id of the action to be called.
  * @param {*} message The message to be sent. The message global $. Will have a .primise object added
  * @param {*} threadID  The id of the thread to send the message to. If id is blank, the message will be sent to all threads.
- * @param {*} timeout The number of seconds to wait for a response before timing out.
+ * @param {*} timeout The number of seconds to wait for a response before timing out. 0 will disable the timeout - await forever and ever.
  * @property {pbject} message.$ FUNCITON PROVIDED. The global message object.
  * @property {string} message.$.id FUNCITON PROVIDED. The id of the action to be called.
  * @property {string} message.$.promise.id FUNCITON PROVIDED. The id of the promise.
@@ -679,6 +706,10 @@ var myDefferedPromises = []
  * @property {object} Promise.Reject.return.$ The global object, a copy of the object the function will provide including a promise object.
  * @property {object} Promise.Resolve.return Typically the promise, when resolved, will return the data requested.
  * @property {object} Promise.Resolve.return.$ The global object, a copy of the object the function will provide including a promise object.
+ * @property {object} Promise.Resolve.return.$.on The timestamp information of the thread promise
+ * @property {number} Promise.Resolve.return.$.on.started The timestamp of when the promise was started.
+ * @property {number} Promise.Resolve.return.$.on.ended The timestamp of when the promise was ended.
+ * @property {number} Promise.Resolve.return.$.on.elapsed The number of milliseconds the promise took to complete.
  * @see {@link module:@jumpcutking/threads/thread/handleMessage} For more information on the returned obejects.
  * @returns {Promise} The promise object.
  * @returns {object} The data returned from the thread.
@@ -693,11 +724,12 @@ async function AsyncRequest(actionID, message = {}, threadID = "", timeout = 30)
     var deffered = defferedPrimise.create();
     deffered.actionId = actionID;
     deffered.threadId = threadID;
+    deffered.started = Date.now();
 
     if (threadID == "") {
-        deffered.promiseId = `${actionID}.*.${Date.now()}`;
+        deffered.promiseId = `${actionID}.*.${deffered.started}`;
     } else {
-        deffered.promiseId = `${actionID}.${threadID}.${Date.now()}`;
+        deffered.promiseId = `${actionID}.${threadID}.${deffered.started}`;
     }
 
     // deffered.timeout = setTimeout;
@@ -712,41 +744,49 @@ async function AsyncRequest(actionID, message = {}, threadID = "", timeout = 30)
         id: deffered.promiseId
     };
 
-    //setup Timeout
-    deffered.timeoutInterval = setTimeout(() => {
-        var index = myDefferedPromises.indexOf(deffered);
-        if (index > -1) {
-            myDefferedPromises.splice(index, 1);
-        }
 
-        // SimpleLog("Promise timed out.", {
-        //     promiseId: deffered.promiseId,
-        //     actionId: deffered.actionId,
-        //     threadId: deffered.threadId
-        // });
+    if (!timeout == 0) {
+        //setup Timeout
+        deffered.timeoutInterval = setTimeout(() => {
+            var index = myDefferedPromises.indexOf(deffered);
+            if (index > -1) {
+                myDefferedPromises.splice(index, 1);
+            }
 
-        var newError = new Error(`Promise timed out after the allowed ${timeout} seconds.`);
-        newError = JSON.parse(JSON.stringify(newError, Object.getOwnPropertyNames(newError)));
+            // SimpleLog("Promise timed out.", {
+            //     promiseId: deffered.promiseId,
+            //     actionId: deffered.actionId,
+            //     threadId: deffered.threadId
+            // });
 
-        newError.stack = jckConsole.parseStackTrace(newError.stack, 1);
+            var newError = new Error(`Promise timed out after the allowed ${timeout} seconds.`);
+            newError = JSON.parse(JSON.stringify(newError, Object.getOwnPropertyNames(newError)));
 
-        newError.$ = {
-            id: "promise.reject",
-            promise: {
-                id: deffered.promiseId
-            },
-            actionId: deffered.actionId
-        }
+            newError.stack = jckConsole.parseStackTrace(newError.stack, 1);
 
-        if (deffered.threadId == "") {
-            newError.$.threadId = "*";
-        } else {
-            newError.$.threadId = deffered.threadId;
-        }
+            newError.$ = {
+                id: "promise.reject",
+                promise: {
+                    id: deffered.promiseId
+                },
+                actionId: deffered.actionId
+            }
 
-        deffered.reject(newError);
+            if (deffered.threadId == "") {
+                newError.$.threadId = "*";
+            } else {
+                newError.$.threadId = deffered.threadId;
+            }
 
-    }, timeout * 1000);
+            deffered.reject(newError);
+
+        }, timeout * 1000);
+
+    } else {
+        
+        deffered.timeoutInterval = false;
+
+    }
 
     myDefferedPromises.push(deffered);
 
@@ -757,11 +797,20 @@ async function AsyncRequest(actionID, message = {}, threadID = "", timeout = 30)
         Send(actionID, message, threadID, true);
         var repo = await deffered.promise;
 
+        deffered.ended = Date.now();
+        deffered.elapsed = deffered.ended - deffered.started;
+
         if (repo.$.id == "promise.reject") {
             var err = new Error("A promise was rejected.");
             err = {...err, ...repo};
             throw err;
         }
+
+        repo.$.on = {
+            started: deffered.started,
+            ended: deffered.ended,
+            elapsed: deffered.elapsed
+        };
 
         return repo;
 
@@ -1058,7 +1107,7 @@ function handleMessage(thread, message) {
         SimpleLog("Error reading the message varable.", {
             thread: detialsOfThread(thread),
             message: message,
-            error: error
+            error: generateSafeError(error)
         });
         //no reason to handle this error
     }
@@ -1072,7 +1121,7 @@ function handleMessage(thread, message) {
         SimpleLog("Error finding onData in threadOptions", {
             thread: detialsOfThread(thread),
             message: message,
-            error: error
+            error: generateSafeError(error)
         });
     }
 
@@ -1104,7 +1153,7 @@ function handleMessage(thread, message) {
             SimpleLog("Message not JSON.", {
                 thread: detialsOfThread(thread),
                 message: message,
-                error: error
+                error: generateSafeError(error)
             });
             return;
         }
@@ -1211,7 +1260,10 @@ function handleMessage(thread, message) {
             myDefferedPromises.splice(foundPromiseIndex, 1);
 
             //clear the timeout
-            clearInterval(foundPromise.timeoutInterval);
+
+            if (foundPromise.timeoutInterval) {
+                clearInterval(foundPromise.timeoutInterval);
+            }
 
             //resolve or reject the promise
             if (message.$.id == "promise.resolve") {
@@ -1246,7 +1298,7 @@ function handleMessage(thread, message) {
                         owner: options.id,
                         message: `Error running action: ${message.$.id} registered to the manager: ${options.id}.`,
                         objects: {
-                            error: error,
+                            error: generateSafeError(error),
                             data: message,
                             thread: detialsOfThread(thread)
                         }
@@ -1275,7 +1327,7 @@ function handleMessage(thread, message) {
             action: `onData.error`,
             message: `Thread: ${thread.id} Could not parse JSON.`,
             objects: {
-                error: error,
+                error: generateSafeError(error),
                 data: message
             }
         })
@@ -1368,6 +1420,13 @@ function receivedLog(message) {
 
         if (Object.keys(nObject).length == 0) {
 
+            //do I have a from
+
+            var from = null;
+            if ("from" in message.objects) {
+                from = message.objects.from;
+            }
+
             //is message.objects.stack a object
             if (typeof message.objects.stack == "object") {
 
@@ -1376,6 +1435,7 @@ function receivedLog(message) {
                     // thread: message["$"].threadId,
                     action: "Console",
                     message: "error",
+                    from: from,
                     objects: [`${message.message} Thread: ${message.$.threadId}.`, message.objects]
                 });
                 return;
@@ -1387,6 +1447,7 @@ function receivedLog(message) {
                     // thread: message["$"].threadId,
                     action: "Console",
                     message: "error",
+                    from: from,
                     objects: [`${message.message} Thread: ${message.$.threadId}.
         ${message.objects.stack}`]
                 });
@@ -1446,6 +1507,9 @@ function receivedLog(message) {
     }
 }
 
+
+var procDir = process.cwd();
+
 /**
  * Shares a Pretty Log message from the child thread.
  * To activiate use init(,{logging: true}) on the child thread and the parent thread.
@@ -1454,6 +1518,61 @@ function receivedLog(message) {
 function sharePrettyLog(msg) {
 
     // console.log(msg);
+
+    var from = "";
+
+    try {
+        
+        var lastObj = msg.objects[msg.objects.length - 1];
+
+        if (options.showFrom){
+            // if (msg.objects.length > 0) {
+                if ("from" in lastObj) {
+                    if ("file" in lastObj.from) {
+
+                        var file = lastObj.from.file.replace(procDir,"");
+
+                        //prevent deep threading alerts
+                        if (!(file == "/node_modules/@jumpcutking/threads/src/threads.js")) {
+                            from = `${file}:${lastObj.from.line}:${lastObj.from.column}`;
+                        }
+
+                    }
+                }
+            // }
+        }
+
+        if (msg.objects.length > 0) {
+            if ("from" in lastObj) {
+                if ("file" in lastObj.from) {
+                    delete lastObj.from;
+
+                    //if last object has no more properties, remove it
+                    if (Object.keys(lastObj).length == 0) {
+                        msg.objects.pop();
+                    }
+                }
+            }
+        }
+
+    } catch (error) {
+        
+    }
+
+    if (!from == "") {
+        msg.action = from;
+    }
+
+
+    // if (options.showFrom) {
+    //     from = `${msg.objects[1].from.file.replace(procDir,"")}:${msg.objects[1].from.line}:${msg.objects[1].from.column}`;
+    // }
+
+    // // if (options.showFrom) {
+    // //     from = `${msg.objects.from.file.replace(procDir,"")}:${msg.objects.from.line}:${msg.objects.from.column}`;
+    // // }
+
+    // delete msg.objects[1].from;
 
     var logHandler = console.log;
     var color = false;
@@ -1527,7 +1646,7 @@ function sharePrettyLog(msg) {
         // }
 
     } else {
-        logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}]`) + ' '
+        logHandler(colorOf.dim(`${msg.$.threadId}:[${msg.action}] ${from}`) + ' '
         + util.inspect(msg.objects, {showHidden: false, depth: null, colors: true}));
     }
 
@@ -1555,6 +1674,7 @@ function close(id) {
         Send("thread.close", {
             close: true
         }, id);
+        my.threads.remove(id);
     } else { 
         throw new Error(`Thread ${id} not found.`);
     }
@@ -1568,8 +1688,10 @@ function close(id) {
 function kill(id) {
     var thread = my.threads.search(id);
     if (thread) {
-        console.log(`Closing thread ${id}.`);
+        console.log(`Killing thread ${id}.`);
         thread.items[0].process.kill(1);
+        my.threads.remove(id);
+        console.log(`Killed thread ${id}.`);
     } else { 
         throw new Error(`Thread ${id} not found.`);
     }
@@ -1621,7 +1743,7 @@ process.on('uncaughtException', (error) => {
                 $: {
                     id: "promise.reject"
                 },
-                error: err,
+                error: error,
                 message: error.message,
                 stack: error.stack
                 // stack: error.stack

@@ -17,6 +17,7 @@ May be subject to The Universe Terms of Service.
     * [~jckConsole](#module_@jumpcutking/threads/src/thread..jckConsole)
     * [~options](#module_@jumpcutking/threads/src/thread..options)
     * [~buffer](#module_@jumpcutking/threads/src/thread..buffer)
+    * [~isInit()](#module_@jumpcutking/threads/src/thread..isInit) ⇒ <code>boolean</code>
     * [~init(_options)](#module_@jumpcutking/threads/src/thread..init)
     * [~Startup(data)](#module_@jumpcutking/threads/src/thread..Startup)
     * [~Close()](#module_@jumpcutking/threads/src/thread..Close)
@@ -56,12 +57,22 @@ quitOnException: if true, the thread will quit when an exception is thrown.
 The buffer for incoming data.
 
 **Kind**: inner property of [<code>@jumpcutking/threads/src/thread</code>](#module_@jumpcutking/threads/src/thread)  
+<a name="module_@jumpcutking/threads/src/thread..isInit"></a>
+
+### @jumpcutking/threads/src/thread~isInit() ⇒ <code>boolean</code>
+Has the thread already been initialized?
+Use this to discover if another process is using the script as part of a thread.
+You don't need to call init() if this is true
+
+**Kind**: inner method of [<code>@jumpcutking/threads/src/thread</code>](#module_@jumpcutking/threads/src/thread)  
+**Returns**: <code>boolean</code> - True if the thread has been initialized.  
 <a name="module_@jumpcutking/threads/src/thread..init"></a>
 
 ### @jumpcutking/threads/src/thread~init(_options)
 Set up the child thread.
 
 **Kind**: inner method of [<code>@jumpcutking/threads/src/thread</code>](#module_@jumpcutking/threads/src/thread)  
+**Throw**: The thread has already been initialized.  
 
 | Param | Type | Description |
 | --- | --- | --- |

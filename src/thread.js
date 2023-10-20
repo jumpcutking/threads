@@ -52,6 +52,19 @@ var my = {
 module.exports.actions = my.actions;
 module.exports.options = options;
 
+var _hasInit = false;
+
+/**
+ * Has the thread already been initialized?
+ * Use this to discover if another process is using the script as part of a thread.
+ * You don't need to call init() if this is true
+ * @returns {boolean} True if the thread has been initialized.
+ */
+function isInit() {
+    return _hasInit
+} module.exports.isInit = isInit;
+module.exports.isInitialized = isInit;
+
 /**
  * Set up the child thread.
  * @param {Object} _options The options to set up the thread with.
@@ -63,8 +76,13 @@ module.exports.options = options;
  * @property {boolean} logging If true, the thread will log messages to the thread manager. It will also overide console.
  * @property {boolean} quitOnException If true, the thread will quit when an exception is thrown.
  * @property {object} console The jckConsole options. @see {@link module:@jumpcutking/console~startup} for details.
+ * @throw The thread has already been initialized.
  */
 function init(_options = {}) {
+
+    if (_hasInit) {
+        throw new Error("The thread has already been initialized.");
+    }
 
     log_verbose("init", `Initializing thread...`, {
         script: process.argv[1],
@@ -212,6 +230,8 @@ function init(_options = {}) {
         DebugStartUp();
     }
 
+    _hasInit = true;
+
 }  module.exports.init = init;
 
 async function DebugStartUp() {
@@ -259,11 +279,11 @@ function OverideConsole() {
 
     jckConsole.startup(consoleOptions);
 
-    jckConsole.on("entry", function (type, message, args, stack) {
+    jckConsole.on("entry", function (type, message, args, stack, from) {
         if (stack == null) {
-            log("Console", type, [message, ...args]);
+            log("Console", type, [message, ...args, {from: from}]);
         } else {
-            log("Console", type, [message, ...args, {stack: stack}]);
+            log("Console", type, [message, ...args, {stack: stack, from: from}]);
         }
     });
 
@@ -331,6 +351,28 @@ async function handleMessage(message) {
         message = JSON.parse(message);
     }
 
+    if (!"$" in message) {
+        var error = new Error("The message does not contain a global object. It's possible that the communication between the thread and the thread manager is being manually controled.");
+        var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
+        error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        error.stack = stacktrace;
+
+        // console.error(`${error.message} [on thread ${options.id}]`, {
+        //     error: error,
+        //     message: message
+        // });
+
+        log_verbose("onData.error", `Thread: ${options.id} ${error.message}.`, {
+            error: error,
+            message: message
+        });
+    }
+
+
+    // console.info("Message", {
+    //     message: message,
+    //     message$: message.$
+    // });
     //check to see if the message contains a $.promise object
 
     if ("promise" in message.$) {
