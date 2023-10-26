@@ -532,23 +532,13 @@ async function handleMessage(message) {
 } module.exports.handleMessage = handleMessage;
 
 /**
+ * USES jckConsole.generateSafeError();
  * Generates a safe and passable error message
  * @param {*} err The error to generate a safe error message for.
  */
 function generateSafeError(err) {
 
-    //if err is undefined, return undefined
-    if (typeof err == "undefined") {
-        console.error("Threads is unable to generate a safe error. Error is undefined.");
-    }
-
-    if (typeof err == "string") {
-        return err;
-    }
-
-    var safeError = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
-    safeError.stack = jckConsole.parseStackTrace(safeError.stack, 0);
-    return safeError;
+    return jckConsole.generateSafeError(err);
 
 } module.exports.generateSafeError = generateSafeError;
 
