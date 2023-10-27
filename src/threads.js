@@ -17,6 +17,7 @@
  */
 var { spawn } = require('child_process');
 
+var JSONstringify = require("./JSON.stringify.overide.js");
 /**
  * Using util to deep dive into objects.
  */
@@ -527,7 +528,7 @@ function add(id, local, options = {}) {
             };
 
             //wrap message in "\x04" and json stringify it
-            data =`\x04${JSON.stringify(data)}\x04`;
+            data =`\x04${JSONstringify(data)}\x04`;
 
             if (thread.process) {
                 try {
@@ -664,23 +665,13 @@ function list() {
 
 
 /**
- * Generates a safe and passable error message
+ * Generates a safe and passable error message.
+ * Moved to @jumpcutking/console
  * @param {*} err The error to generate a safe error message for.
  */
 function generateSafeError(err) {
 
-    //if err is undefined, return undefined
-    if (typeof err == "undefined") {
-        console.error("Threads is unable to generate a safe error. Error is undefined.");
-    }
-
-    if (typeof err == "string") {
-        return err;
-    }
-
-    var safeError = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
-    safeError.stack = jckConsole.parseStackTrace(safeError.stack, 0);
-    return safeError;
+    return jckConsole.generateSafeError(err);
 
 } module.exports.generateSafeError = generateSafeError;
 
@@ -759,10 +750,10 @@ async function AsyncRequest(actionID, message = {}, threadID = "", timeout = 30)
             //     threadId: deffered.threadId
             // });
 
-            var newError = new Error(`Promise timed out after the allowed ${timeout} seconds.`);
-            newError = JSON.parse(JSON.stringify(newError, Object.getOwnPropertyNames(newError)));
+            // var newError = new Error(`Promise timed out after the allowed ${timeout} seconds.`);
+            var newError = generateSafeError( new Error(`Promise timed out after the allowed ${timeout} seconds.`));
 
-            newError.stack = jckConsole.parseStackTrace(newError.stack, 1);
+            // newError.stack = jckConsole.parseStackTrace(newError.stack, 1);
 
             newError.$ = {
                 id: "promise.reject",

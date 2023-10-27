@@ -8,6 +8,13 @@ Multiple "uncaught" messages may be reported to the console when an uncaught exc
 
 ## What's New
 
+### v1.7.0
+Threads now reports promises, functions, and undefined elements back to the thread manager using a descriptive JSON object. It's for identification and debugging purposes only. You can't call functions passed between threads for multiple reasons. I'll choose security for now. In the future, I could update lines to use functions passed into objects using deferred promises, but you should use registered actions to prevent hackers from abusing scripts. The generateSafeError function is now universal to all areas of the code and relies on @jumpcutking/console's version.
+
+You'll note a new "JSON.stringify.override" module in the source code. The new module offers a quick and universal function for converting JSON and identifying non-stringifyable objects. You'll need to use this consistently when communicating through threads. Threads will do it automatically for you, but using this for debugging, database storage, and the like is not a bad idea. At the very least, it helps keep track of failed variables because you forgot to wait for a promise to resolve.
+
+A helpful change to @jumpcutking/console will help stack traces be clickable. I added a "s" string variable that enables code editors with integrated terminals (such as Visual Studio Code) to retain clickable stack traces. Feel free to delete this variable from databases and where needed.
+
 ### v1.6.0
 Threads now report where a log entry was created in your script and share that information with the console. This update relies on a breaking change to jckConsole callbacks, adding the parameter "from" to several components. 
 

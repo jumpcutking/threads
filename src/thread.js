@@ -19,6 +19,11 @@
 var jckConsole = require("@jumpcutking/console"); 
 
 /**
+ * The JSON.stringify.overide module.
+ */
+var JSONstringify = require("./JSON.stringify.overide.js");
+
+/**
  * The options that you can set in the module.
  * id: the name of the thread
  * verbose: whether to log verbose messages
@@ -38,6 +43,15 @@ var options = {
     quitOnException: true, 
     console: {}
 }
+
+/**
+ * Checks if the thread is in debug mode.
+ * This is great for dispatching functions that the owning process would typically disaptch through the thread manager.
+ * @returns 
+ */
+function isDebug() {
+    return options.debug;
+} module.exports.isDebug = isDebug;
 
 /**
  * The buffer for incoming data.
@@ -93,6 +107,11 @@ function init(_options = {}) {
 
     if ("debug" in _options) {
         options.debug = _options.debug;
+    } else {
+        //check for "-d" or "debug" in the arguments
+        if (process.argv.includes("-d") || process.argv.includes("debug")) {
+            options.debug = true;
+        }
     }
 
     if ("verbose" in _options) {
@@ -202,9 +221,10 @@ function init(_options = {}) {
 
         //is the err an error?
         if (err instanceof Error) {
-            var stacktrace = jckConsole.parseStackTrace(err.stack, 1);
-            err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
-            err.stack = stacktrace;
+        //     var stacktrace = jckConsole.parseStackTrace(err.stack, 1);
+        //     err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+        //     err.stack = stacktrace;
+            err = jckConsole.generateSafeError(err);
         } else if (typeof err === "string") {
             err = {
                 message: err,
@@ -243,7 +263,7 @@ async function DebugStartUp() {
         }
     };
 
-    handleMessage(JSON.stringify(jsonMessage));
+    handleMessage(JSONstringify(jsonMessage));
 
 }
 
@@ -352,10 +372,10 @@ async function handleMessage(message) {
     }
 
     if (!"$" in message) {
-        var error = new Error("The message does not contain a global object. It's possible that the communication between the thread and the thread manager is being manually controled.");
-        var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
-        error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
-        error.stack = stacktrace;
+        var error = jckConsole.generateSafeError(new Error("The message does not contain a global object. It's possible that the communication between the thread and the thread manager is being manually controled."));
+        // var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
+        // error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        // error.stack = stacktrace;
 
         // console.error(`${error.message} [on thread ${options.id}]`, {
         //     error: error,
@@ -422,13 +442,16 @@ async function handleMessage(message) {
          */
         message.$.promise.reject = function (err, data = null) {
 
-                err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
-
-
-                //use @jumpcutking/console~stacktrace object to share stack trace
-                if ("stack" in err) {
-                    err.stack = jckConsole.parseStackTrace(err.stack, 1);
+                if (err instanceof Error) {
+                    err = jckConsole.generateSafeError(err);
                 }
+
+                // err = JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
+
+                // //use @jumpcutking/console~stacktrace object to share stack trace
+                // if ("stack" in err) {
+                //     err.stack = jckConsole.parseStackTrace(err.stack, 1);
+                // }
 
                 //add the promise object to the data object
                 err.$ = {
@@ -511,9 +534,11 @@ async function handleMessage(message) {
         //     message: message
         // });
 
-        var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
-        error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
-        error.stack = stacktrace;
+        error = jckConsole.generateSafeError(error);
+
+        // var stacktrace = jckConsole.parseStackTrace(error.stack, 1);
+        // error = JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+        // error.stack = stacktrace;
 
         // console.error(`${error.message} [on thread ${options.id}]`, {
         //     error: error,
@@ -590,7 +615,7 @@ function request(id, message = {}) {
         return;
     }
 
-    message = `\x04${JSON.stringify(message)}\x04`;
+    message = `\x04${JSONstringify(message)}\x04`;
     process.stdout.write(message);
 
 }

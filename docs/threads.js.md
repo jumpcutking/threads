@@ -314,7 +314,8 @@ List all the threads and listerners.
 <a name="module_@jumpcutking/threads/src/threads..generateSafeError"></a>
 
 ### @jumpcutking/threads/src/threads~generateSafeError(err)
-Generates a safe and passable error message
+Generates a safe and passable error message.
+Moved to @jumpcutking/console
 
 **Kind**: inner method of [<code>@jumpcutking/threads/src/threads</code>](#module_@jumpcutking/threads/src/threads)  
 
