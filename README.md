@@ -7,6 +7,8 @@ Originally built as part of The Universe App Tools, I've released the source to 
 Multiple "uncaught" messages may be reported to the console when an uncaught exception occurs. This bug also affects multi-level threading processes where more than one thread manager is in play (such as building Universe App Tools from the local webserver). 
 
 ## What's New
+### v1.7.1
+Another round of Bug fixes.
 
 ### v1.7.0
 Threads now reports promises, functions, and undefined elements back to the thread manager using a descriptive JSON object. It's for identification and debugging purposes only. You can't call functions passed between threads for multiple reasons. I'll choose security for now. In the future, I could update lines to use functions passed into objects using deferred promises, but you should use registered actions to prevent hackers from abusing scripts. The generateSafeError function is now universal to all areas of the code and relies on @jumpcutking/console's version.
