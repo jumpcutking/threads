@@ -47,7 +47,7 @@ var options = {
 /**
  * Checks if the thread is in debug mode.
  * This is great for dispatching functions that the owning process would typically disaptch through the thread manager.
- * @returns 
+ * @returns {boolean} True if the thread is in debug mode.
  */
 function isDebug() {
     return options.debug;
