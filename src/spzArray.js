@@ -1,4 +1,4 @@
-/**
+/*!
  * Enables objects to be regestered to an array.
  * 
  * This component may not be reversed engineered for hacking or abuse

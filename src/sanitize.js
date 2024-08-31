@@ -1,4 +1,4 @@
-/**
+/*!
  * Santization helps report common errors with parameters.
  * 
  * This component may not be reversed engineered for hacking or abuse

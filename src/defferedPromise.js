@@ -1,4 +1,4 @@
-/**
+/*!
  * Thread manager for spawned node processes.
  * 
  * This component may not be reversed engineered for hacking or abuse

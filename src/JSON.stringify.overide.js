@@ -1,4 +1,4 @@
-/**
+/*!
  * Thread module for the child process.
  * 
  * This component may not be reversed engineered for hacking or abuse
